@@ -16,15 +16,15 @@ public class StemmerMain {
 
     // POSTagger and Stemmer
     private final static String POS_TAGGER_MODEL_PATH =
-            "WEB-INF" + File.separator + "resources" + File.separator + 
+    		File.separator + "WEB-INF" + File.separator + "resources" + File.separator + 
             "pos_models" + File.separator + "english-left3words-distsim.tagger";
     
     private final static String POS_TAGGER_CONFIG_PATH =
-            "WEB-INF" + File.separator + "resources" + File.separator + 
+    		File.separator + "WEB-INF" + File.separator + "resources" + File.separator + 
             "pos_models" +  File.separator + "english-left3words-distsim.tagger.props";
     
     private final static String TAG_SEPARATOR = "_";
-    private final static String WN_HOME = "WEB-INF" + File.separator + 
+    private final static String WN_HOME = File.separator + "WEB-INF" + File.separator + 
             "resources" +  File.separator + "WordNet-3.0";
     
     private POSTagger posTagger;
