@@ -43,12 +43,14 @@
 
 	<dependencies>
 		<!-- General dependencies for standard applications -->
+		<!--
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -69,6 +71,7 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
@@ -79,12 +82,14 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>${aspectj.version}</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>net.sf.flexjson</groupId>
 			<artifactId>flexjson</artifactId>
@@ -95,6 +100,7 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
 		</dependency>
+		-->
 
 		<!-- Spring dependencies -->
 		<dependency>
@@ -108,6 +114,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
@@ -134,6 +141,7 @@
 			<artifactId>hibernate-core</artifactId>
 			<version>4.3.6.Final</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
@@ -159,12 +167,15 @@
 			<artifactId>commons-collections</artifactId>
 			<version>3.2.1</version>
 		</dependency>
+		-->
+		<!--
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
 			<version>4.3.2.Final</version>
 		</dependency>
-		
+		-->
+		<!--
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
@@ -175,6 +186,7 @@
 			<artifactId>jta</artifactId>
 			<version>1.1</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
@@ -190,6 +202,7 @@
 			<artifactId>commons-pool</artifactId>
 			<version>1.5.6</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>commons-dbcp</groupId>
 			<artifactId>commons-dbcp</artifactId>
@@ -205,6 +218,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
@@ -231,11 +245,13 @@
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.2.2</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>javax.servlet.jsp.jstl</groupId>
 			<artifactId>jstl-api</artifactId>
-			<version>1.2</version>
-		</dependency>
+			<version>1.2
+		-->
+		<!--
 		<dependency>
 			<groupId>org.glassfish.web</groupId>
 			<artifactId>jstl-impl</artifactId>
@@ -252,17 +268,22 @@
 			<artifactId>joda-time</artifactId>
 			<version>1.6</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>javax.servlet.jsp</groupId>
 			<artifactId>jsp-api</artifactId>
 			<version>2.1</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!--
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
 			<version>1.5</version>
 		</dependency>
+		-->
+		<!--
 		<dependency>
 			<groupId>org.apache.tiles</groupId>
 			<artifactId>tiles-jsp</artifactId>
@@ -273,6 +294,7 @@
 			<artifactId>postgresql</artifactId>
 			<version>9.1-901-1.jdbc4</version>
 		</dependency>
+		-->
 
 		<!-- Other libraries -->
 
@@ -324,13 +346,12 @@
 					</configuration>
 				</plugin>
 
+				<!--
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>aspectj-maven-plugin</artifactId>
 					<version>1.4</version>
 					<dependencies>
-						<!-- NB: You must use Maven 2.0.9 or above or these are ignored (see 
-							MNG-2972) -->
 						<dependency>
 							<groupId>org.aspectj</groupId>
 							<artifactId>aspectjrt</artifactId>
@@ -361,13 +382,11 @@
 						</aspectLibraries>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
-						<!-- Aspects in src/main/java and src/main/aspects are added as default 
-							in the compile goal. Aspects in src/test/java and src/test/aspects are added 
-							as default in the test-compile goal. Aspects in src/main/java are added in 
-							the test-compile goal if weaveWithAspectsInMainSourceFolder is set to true -->
+
 						<weaveWithAspectsInMainSourceFolder>false</weaveWithAspectsInMainSourceFolder>
 					</configuration>
 				</plugin>
+				-->
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -377,7 +396,8 @@
 						<encoding>${project.build.sourceEncoding}</encoding>
 					</configuration>
 				</plugin>
-
+				
+				<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
@@ -390,6 +410,7 @@
 						</excludes>
 					</configuration>
 				</plugin>
+				-->
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -437,6 +458,7 @@
 					</configuration>
 				</plugin>
 
+				<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-idea-plugin</artifactId>
@@ -444,8 +466,8 @@
 					<configuration>
 						<downloadSources>true</downloadSources>
 						<dependenciesAsLibraries>true</dependenciesAsLibraries>
-					</configuration>
-				</plugin>
+					</conf
+				-->
 
 				<plugin>
 					<groupId>org.apache.tomcat.maven</groupId>
@@ -464,6 +486,7 @@
 					</configuration>
 				</plugin>
 
+				<!--
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>selenium-maven-plugin</artifactId>
@@ -482,6 +505,7 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+				-->
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
