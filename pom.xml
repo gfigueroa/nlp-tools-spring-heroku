@@ -51,6 +51,7 @@
 			<scope>test</scope>
 		</dependency>
 		-->
+		<!--
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -71,6 +72,7 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>${slf4j.version}</version>
 		</dependency>
+		-->
 		<!--
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -103,6 +105,7 @@
 		-->
 
 		<!-- Spring dependencies -->
+		<!--
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
@@ -114,6 +117,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		-->
 		<!--
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -227,6 +231,7 @@
 			<artifactId>spring-webmvc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.springframework.webflow</groupId>
 			<artifactId>spring-js-resources</artifactId>
@@ -248,6 +253,7 @@
 			<artifactId>commons-fileupload</artifactId>
 			<version>1.2.2</version>
 		</dependency>
+		-->
 		<!--
 		<dependency>
 			<groupId>javax.servlet.jsp.jstl</groupId>
