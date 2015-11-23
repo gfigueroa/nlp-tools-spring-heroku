@@ -192,6 +192,8 @@
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring.version}</version>
 		</dependency>
+		
+		<!--
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-orm</artifactId>
@@ -202,6 +204,7 @@
 			<artifactId>commons-pool</artifactId>
 			<version>1.5.6</version>
 		</dependency>
+		-->
 		<!--
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -430,11 +433,11 @@
 				</plugin>
 
 				<!-- IDE -->
+				<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-eclipse-plugin</artifactId>
 					<version>2.7</version>
-					<!-- Note 2.8 does not work with AspectJ aspect path -->
 					<configuration>
 						<downloadSources>true</downloadSources>
 						<downloadJavadocs>false</downloadJavadocs>
@@ -457,7 +460,7 @@
 						</additionalProjectnatures>
 					</configuration>
 				</plugin>
-
+				-->
 				<!--
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
