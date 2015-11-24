@@ -6,17 +6,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	
-	<profiles>
-		<profile>
-			<activation>
-                <property>
-                    <name>env.DYNO</name>
-                </property>
-            </activation>
-		</profile>
-	</profiles>
-
 	<properties>
 		<aspectj.version>1.8.1</aspectj.version>
 		<java.version>1.6</java.version>
