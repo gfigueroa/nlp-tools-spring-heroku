@@ -31,7 +31,12 @@ public class StemmerMain {
     private Stemmer stemmer;
 
     public StemmerMain(String path) {
-        // Load POSTagger
+        // Check if path ends with separator
+    	if (!path.endsWith(File.separator)) {
+    		path += File.separator;
+    	}
+    	
+    	// Load POSTagger
         posTagger = new POSTagger(path + POS_TAGGER_MODEL_PATH, path + 
                 POS_TAGGER_CONFIG_PATH, TAG_SEPARATOR);
         // Load Stemmer
