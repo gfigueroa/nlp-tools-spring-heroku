@@ -22,7 +22,7 @@ public class TaggerController {
     @RequestMapping(value="/tagger", method = RequestMethod.POST)
     public String tagText(ModelMap model, HttpServletRequest request) {
         
-        String path = request.getSession().getServletContext().getRealPath("/");
+        String path = request.getSession().getServletContext().getRealPath("");
         StemmerMain stemmer = new StemmerMain(path);
         
         try {

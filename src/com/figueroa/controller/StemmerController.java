@@ -22,8 +22,7 @@ public class StemmerController {
     @RequestMapping(value="/stemmer", method = RequestMethod.POST)
     public String stemText(ModelMap model, HttpServletRequest request) {
         
-        String path = request.getSession().getServletContext().getRealPath("/");
-        
+        String path = request.getSession().getServletContext().getRealPath("");
         StemmerMain stemmer = new StemmerMain(path);
         
         try {
