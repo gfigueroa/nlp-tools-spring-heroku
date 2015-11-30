@@ -8,7 +8,7 @@ Requires Java 7, Eclipse 4.5.1 (Mars), Apache Maven 3.3.3, a Java web server (e.
 
 ## Usage
 
-TODO: Write usage instructions
+The site can be access with the following [link](https://nlp-tools-java.herokuapp.com/)
 
 ## Contributing
 
