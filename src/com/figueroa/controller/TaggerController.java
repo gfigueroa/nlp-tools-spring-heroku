@@ -10,6 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class TaggerController {
 
+	/**
+	 * Handles a GET request to the tagger view.
+	 * Initializes and opens tagger view.
+	 * @param model
+	 * @param request
+	 * @return the result view
+	 */
     @RequestMapping(value="/tagger", method = RequestMethod.GET)
     public String getPage(ModelMap model, HttpServletRequest request) {
 
@@ -19,6 +26,13 @@ public class TaggerController {
         return "tagger";
     }
     
+    /**
+     * Handles a POST request to the tagger view.
+     * Receives text parameter, tags it and returns tagger view.
+     * @param model
+     * @param request
+     * @return the result view
+     */
     @RequestMapping(value="/tagger", method = RequestMethod.POST)
     public String tagText(ModelMap model, HttpServletRequest request) {
         

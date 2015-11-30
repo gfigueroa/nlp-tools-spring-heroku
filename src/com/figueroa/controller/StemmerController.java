@@ -10,6 +10,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 public class StemmerController {
 
+	/**
+	 * Handles a GET request to the stemmer view.
+	 * Initializes and opens stemmer view.
+	 * @param model
+	 * @param request
+	 * @return the result view
+	 */
     @RequestMapping(value="/stemmer", method = RequestMethod.GET)
     public String getPage(ModelMap model, HttpServletRequest request) {
 
@@ -19,6 +26,13 @@ public class StemmerController {
         return "stemmer";
     }
     
+    /**
+     * Handles a POST request to the stemmer view.
+     * Receives text parameter, lemmatizes it and returns stemmer view.
+     * @param model
+     * @param request
+     * @return the result view
+     */
     @RequestMapping(value="/stemmer", method = RequestMethod.POST)
     public String stemText(ModelMap model, HttpServletRequest request) {
         

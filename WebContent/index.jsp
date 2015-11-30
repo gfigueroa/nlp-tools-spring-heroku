@@ -15,7 +15,7 @@
         <ul>  
             <li><a href="stemmer.html">Lemmatizer</a></li>
             <li><a href="tagger.html">POS Tagger</a></li>
-        </ul>  
+        </ul>
                 
      </body>
  </html>
