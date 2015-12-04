@@ -13,7 +13,7 @@
         <a href="index.jsp">Home</a>
         <h1>NLP Tools</h1>
         <ul>  
-            <li><a href="stemmer.html">Lemmatizer</a></li>
+            <li><a href="lemmatizer.html">Lemmatizer</a></li>
             <li><a href="tagger.html">POS Tagger</a></li>
         </ul>
                 

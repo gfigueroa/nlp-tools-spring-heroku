@@ -12,35 +12,44 @@ import java.io.InputStreamReader;
  *
  * @author gfigueroa
  */
-public class StemmerMain {
+public class NLPMain {
 
-    // POSTagger and Stemmer
+	// Resources
+	private final static String RESOURCES_PATH = 
+			"WEB-INF" + File.separator + "resources" + File.separator;
+	
+    // POSTagger and Lemmatizer
     private final static String POS_TAGGER_MODEL_PATH =
-    		"WEB-INF" + File.separator + "resources" + File.separator + 
+    		RESOURCES_PATH +
             "pos_models" + File.separator + "english-left3words-distsim.tagger";
     
     private final static String POS_TAGGER_CONFIG_PATH =
-    		"WEB-INF" + File.separator + "resources" + File.separator + 
+    		RESOURCES_PATH +
             "pos_models" +  File.separator + "english-left3words-distsim.tagger.props";
     
     private final static String TAG_SEPARATOR = "_";
-    private final static String WN_HOME = "WEB-INF" + File.separator + 
-            "resources" +  File.separator + "WordNet-3.0";
+    private final static String WN_HOME = RESOURCES_PATH + "WordNet-3.0";
     
     private POSTagger posTagger;
-    private Stemmer stemmer;
+    private Lemmatizer lemmatizer;
 
-    public StemmerMain(String path) {
+    /**
+     * Initialize the NLPMain class with the context path of the application.
+     * Initializes all required classes for the NLP tools.
+     * TODO: Make this initialization more efficient (once for entire app)
+     * @param contextPath
+     */
+    public NLPMain(String contextPath) {
         // Check if path ends with separator
-    	if (!path.endsWith(File.separator)) {
-    		path += File.separator;
+    	if (!contextPath.endsWith(File.separator)) {
+    		contextPath += File.separator;
     	}
     	
     	// Load POSTagger
-        posTagger = new POSTagger(path + POS_TAGGER_MODEL_PATH, path + 
+        posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, contextPath + 
                 POS_TAGGER_CONFIG_PATH, TAG_SEPARATOR);
-        // Load Stemmer
-        stemmer = new Stemmer(path + WN_HOME, posTagger);
+        // Load Lemmatizer
+        lemmatizer = new Lemmatizer(contextPath + WN_HOME, posTagger);
     }
     
     private void stemCSVFiles(String dataDirectory, String tokenSeparator) {
@@ -48,7 +57,7 @@ public class StemmerMain {
         File fileList[] = directory.listFiles();
 
         System.out.println("***************************************************");
-        System.out.println("Stemming text files for directory: " + dataDirectory +
+        System.out.println("Lemmatizing text files for directory: " + dataDirectory +
                 "...");
         System.out.println("***************************************************");
         System.out.println();
@@ -60,7 +69,7 @@ public class StemmerMain {
                     currFile.getName() +
                     " (" + (i + 1) + "/" + fileList.length + ")...");
 
-            File stemmedFile = new File(currFile.getPath() + ".stemmed");
+            File lemmatizedFile = new File(currFile.getPath() + ".lemmatized");
             try {
                 // File to read
                 FileInputStream fis = new FileInputStream(currFile);
@@ -68,25 +77,25 @@ public class StemmerMain {
                 BufferedReader br = new BufferedReader(new InputStreamReader(bis));
 
                 // File to write
-                if (!stemmedFile.exists()) {
-                    stemmedFile.createNewFile();
+                if (!lemmatizedFile.exists()) {
+                    lemmatizedFile.createNewFile();
                 }
-                FileWriter fw = new FileWriter(stemmedFile.getAbsoluteFile());
+                FileWriter fw = new FileWriter(lemmatizedFile.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
 
                 // If abstract is divided into two or more paragraphs, these are combined.
                 while (br.ready()) {
                     String line = br.readLine();
                     String[] tokens = line.split(tokenSeparator);
-                    String stemmedLine = tokens[0] + tokenSeparator +
+                    String lemmatizedLine = tokens[0] + tokenSeparator +
                             tokens[1] + tokenSeparator;
                     
                     for (int j = 2; j < tokens.length; j++) { // First two tokens are IDs
                         String token = tokens[j];
-                        String stemmedToken = stemmer.stemText(token, false);
-                        stemmedLine += stemmedToken + "\t";
+                        String lemmatizedToken = lemmatizer.stemText(token, false);
+                        lemmatizedLine += lemmatizedToken + "\t";
                     }
-                    bw.write(stemmedLine + "\n");
+                    bw.write(lemmatizedLine + "\n");
                 }
 
                 fis.close();
@@ -101,7 +110,7 @@ public class StemmerMain {
             System.out.println();
         }
         System.out.println("***************************************************");
-        System.out.println("Text stemmed successfully for files in directory: " + dataDirectory);
+        System.out.println("Text lemmatized successfully for files in directory: " + dataDirectory);
     }
 
     private void stemFiles(String dataDirectory) {
@@ -109,7 +118,7 @@ public class StemmerMain {
         File fileList[] = directory.listFiles();
 
         System.out.println("***************************************************");
-        System.out.println("Stemming text files for directory: " + dataDirectory +
+        System.out.println("Lemmatizing text files for directory: " + dataDirectory +
                 "...");
         System.out.println("***************************************************");
         System.out.println();
@@ -121,7 +130,7 @@ public class StemmerMain {
                     currFile.getName() +
                     " (" + (i + 1) + "/" + fileList.length + ")...");
 
-            File stemmedFile = new File(currFile.getPath() + ".stemmed");
+            File lemmatizedFile = new File(currFile.getPath() + ".lemmatized");
             try {
                 // File to read
                 FileInputStream fis = new FileInputStream(currFile);
@@ -129,18 +138,18 @@ public class StemmerMain {
                 BufferedReader br = new BufferedReader(new InputStreamReader(bis));
 
                 // File to write
-                if (!stemmedFile.exists()) {
-                    stemmedFile.createNewFile();
+                if (!lemmatizedFile.exists()) {
+                    lemmatizedFile.createNewFile();
                 }
-                FileWriter fw = new FileWriter(stemmedFile.getAbsoluteFile());
+                FileWriter fw = new FileWriter(lemmatizedFile.getAbsoluteFile());
                 BufferedWriter bw = new BufferedWriter(fw);
 
                 // If abstract is divided into two or more paragraphs, these are combined.
                 while (br.ready()) {
                     String line = br.readLine();
 
-                    String stemmedLine = stemmer.stemText(line, false);
-                    bw.write(stemmedLine + "\n");
+                    String lemmatizedLine = lemmatizer.stemText(line, false);
+                    bw.write(lemmatizedLine + "\n");
                 }
 
                 fis.close();
@@ -155,14 +164,27 @@ public class StemmerMain {
             System.out.println();
         }
         System.out.println("***************************************************");
-        System.out.println("Text stemmed successfully for files in directory: " + dataDirectory);
+        System.out.println("Text lemmatized successfully for files in directory: " + dataDirectory);
     }
 
-    public String stemText(String text) throws Exception {
-        String stemmedText = stemmer.stemText(text, false);
-        return stemmedText;
+    /**
+     * Lemmatize each term in a given string.
+     * @param text
+     * @return the lemmatized text
+     * @throws Exception
+     */
+    public String lemmatizeText(String text) throws Exception {
+        String lemmatizedText = lemmatizer.stemText(text, false);
+        return lemmatizedText;
     }
     
+    /**
+     * Assign POS tags to each term in the given string. 
+     * Uses the Penn Treebank tagset.
+     * @param text
+     * @return the POS-tagged text
+     * @throws Exception
+     */
     public String tagText(String text) throws Exception {
         String taggedText = posTagger.tagText(text);
         return taggedText;

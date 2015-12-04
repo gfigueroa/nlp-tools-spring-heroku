@@ -1,6 +1,8 @@
 package com.figueroa.nlp;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import edu.mit.jwi.*;
 import edu.mit.jwi.item.*;
@@ -17,13 +19,22 @@ import java.util.List;
  * Hsinchu, Taiwan
  * April 2011
  */
-public class Stemmer {
+public class Lemmatizer {
 
     private IDictionary dict;  // The WordNet dictionary
     private POSTagger posTagger;
     private WordnetStemmer stemmer;
 
-    public Stemmer(String wnh, POSTagger posTag) {
+    /**
+     * Constructor for the Lemmatizer class. The Lemmatizer requires an instance
+     * of the POSTagger class, as it first needs to tag each term in a string
+     * for higher precision.
+     * Initializes the class with the given WordNet home directory and
+     * POSTagger instance.
+     * @param wnh: WordNet home directory
+     * @param posTag: instance of POSTagger
+     */
+    public Lemmatizer(String wnh, POSTagger posTag) {
         // construct the URL to the Wordnet dictionary directory
         String wnhome = wnh;
         String path = wnhome + File.separator + "dict";
@@ -39,12 +50,23 @@ public class Stemmer {
 
             stemmer = new WordnetStemmer(dict);
         }
-        catch (Exception e) {
+        catch (MalformedURLException e) {
             System.err.println("Exception in Stemmer creation: " + e.getMessage());
-        }
+            e.printStackTrace();
+        } 
+        catch (IOException e) {
+        	System.err.println("Exception in Stemmer creation: " + e.getMessage());
+        	e.printStackTrace();
+		}
     }
 
-    public String stemText(String text, boolean textIsTagged) throws Exception {
+    /**
+     * Lemmatizes the given text, term by term.
+     * @param text
+     * @param textIsTagged: whether the text has already been POS-tagged or not.
+     * @return
+     */
+    public String stemText(String text, boolean textIsTagged) {
 
         String taggedText;
         if (!textIsTagged) {
@@ -76,6 +98,12 @@ public class Stemmer {
                 if (stems.isEmpty()) {
                     stemmedText = stemmedText.concat(currWord + " ");
                 }
+                else if (stems.get(0).equals("-LRB-")) {
+                	stemmedText = stemmedText.concat("(");
+                }
+                else if (stems.get(0).equals("-RRB-")) {
+                	stemmedText = stemmedText.concat(")");
+                }
                 else {
                     stemmedText = stemmedText.concat(stems.get(0) + " ");
                 }
@@ -100,6 +128,10 @@ public class Stemmer {
         return stemmedText;
     }
 
+    /**
+     * Returns the instance of the POSTagger
+     * @return POSTagger instance for this Lemmatizer
+     */
     public POSTagger getPosTagger() {
         return posTagger;
     }

@@ -1,6 +1,6 @@
 package com.figueroa.controller;
  
-import com.figueroa.nlp.StemmerMain;
+import com.figueroa.nlp.NLPMain;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -36,8 +36,8 @@ public class TaggerController {
     @RequestMapping(value="/tagger", method = RequestMethod.POST)
     public String tagText(ModelMap model, HttpServletRequest request) {
         
-        String path = request.getSession().getServletContext().getRealPath("");
-        StemmerMain stemmer = new StemmerMain(path);
+        String contextPath = request.getSession().getServletContext().getRealPath("");
+        NLPMain stemmer = new NLPMain(contextPath);
         
         try {
             String taggedText;

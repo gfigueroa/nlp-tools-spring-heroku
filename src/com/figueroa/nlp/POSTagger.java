@@ -31,6 +31,14 @@ public class POSTagger {
     private String separator;
     private HashMap<String, POS> posTags; // A mapping between Penn Treebank Tagset and Wordnet POS Tags
 
+    /**
+     * Constructor for the POSTagger class. Initializes the class with the given
+     * model file directory, configuration file directory and default separator
+     * for POS tags
+     * @param modelF: the model file directory
+     * @param configF: the configuration file directory
+     * @param sep: the default separator between a term and a POS tag
+     */
     public POSTagger(String modelF, String configF, String sep) {
         modelFile = modelF;
         configFile = configF;
@@ -57,6 +65,11 @@ public class POSTagger {
         }
     }
 
+    /**
+     * POS-tags the given string, term by term
+     * @param text
+     * @return the tagged text
+     */
     public String tagText(String text) {
 
         // Clean original text
@@ -80,6 +93,11 @@ public class POSTagger {
         return taggedText;
     }
 
+    /**
+     * Gets the word part from an already tagged term
+     * @param taggedWord
+     * @return word part from a tagged term
+     */
     public String getWord(String taggedWord) {
         String word;
         if (!(taggedWord.indexOf(separator) == -1)) {
@@ -92,6 +110,11 @@ public class POSTagger {
         return word;
     }
 
+    /**
+     * Gets tag part from an already tagged term
+     * @param taggedWord
+     * @return tag part from a tagged term
+     */
     public String getTag(String taggedWord) {
         String tag;
         if (!(taggedWord.indexOf(separator) == -1)) {
@@ -104,14 +127,29 @@ public class POSTagger {
         return tag;
     }
 
+    /**
+     * Gets the default separator used in the tagger
+     * @return
+     */
     public String getSeparator() {
         return separator;
     }
 
+    /**
+     * Gets the WordNet POS mapping from the given POS Tag
+     * @param posTag: the Penn Treebank POS tag
+     * @return the WordNet POS instance
+     */
     public POS getPOS(String posTag) {
         return posTags.get(posTag);
     }
 
+    /**
+     * Creates a mapping between WordNet POS Tags (simple) and the POS Tags used in this
+     * tagger (Penn Treebank tagset).
+     * @return a HashMap mapping composite Tags (e.g. JJ, NNP, VB, etc.) with 
+     * simple Tags (e.g. Adjective, Noun, Verb, etc.)
+     */
     private HashMap<String, POS> createPOSTags() {
         posTags = new HashMap<String, POS>();
 

@@ -8,14 +8,14 @@
         <a href="index.jsp">Home</a>
         <h1>Lemmatizer</h1>
         <h2>Original text</h2>
-        <form method="POST" action="stemmer.html">
+        <form method="POST" action="lemmatizer.html">
             <textarea name="text" rows="10" cols="50">${originalText}</textarea>
             <br>
             <input type="submit" value="Lemmatize!" />
         </form>
 
         <h2>Lemmatized text</h2>
-        <textarea name="text" rows="10" cols="50" disabled>${stemmedText}</textarea>
+        <textarea name="text" rows="10" cols="50" disabled>${lemmatizedText}</textarea>
     </center>  
 </body>  
 </html>
