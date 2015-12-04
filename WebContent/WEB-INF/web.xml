@@ -13,11 +13,15 @@
         </servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
+    
     <servlet-mapping>
         <servlet-name>dispatcher</servlet-name>
         <url-pattern>/welcome.jsp</url-pattern>
         <url-pattern>/welcome.html</url-pattern>
         <url-pattern>*.html</url-pattern>
+        <url-pattern>/ws/*</url-pattern>
     </servlet-mapping>
+    
+    
   
 </web-app>

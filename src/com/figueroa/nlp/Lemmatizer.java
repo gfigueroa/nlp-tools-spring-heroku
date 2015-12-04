@@ -98,12 +98,6 @@ public class Lemmatizer {
                 if (stems.isEmpty()) {
                     stemmedText = stemmedText.concat(currWord + " ");
                 }
-                else if (stems.get(0).equals("-LRB-")) {
-                	stemmedText = stemmedText.concat("(");
-                }
-                else if (stems.get(0).equals("-RRB-")) {
-                	stemmedText = stemmedText.concat(")");
-                }
                 else {
                     stemmedText = stemmedText.concat(stems.get(0) + " ");
                 }
@@ -124,7 +118,11 @@ public class Lemmatizer {
                 stemmedText = text;
             }
         }
-
+        
+        // Replace left and right parentheses
+        stemmedText = stemmedText.replaceAll("-LRB- ", "(");
+        stemmedText = stemmedText.replaceAll(" -RRB-", ")");
+        
         return stemmedText;
     }
 
