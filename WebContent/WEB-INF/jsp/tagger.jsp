@@ -5,7 +5,7 @@
 </head>  
 <body>
     <center>
-        <a href="index.jsp">Home</a>
+        <a href="index.html">Home</a>
         <h1>Tagger</h1>
         <h2>Original text</h2>
         <form method="POST" action="tagger.html">

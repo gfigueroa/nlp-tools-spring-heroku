@@ -10,7 +10,7 @@
     </head>
 
     <body>
-        <a href="index.jsp">Home</a>
+        <a href="index.html">Home</a>
         <h1>NLP Tools</h1>
         <ul>  
             <li><a href="lemmatizer.html">Lemmatizer</a></li>

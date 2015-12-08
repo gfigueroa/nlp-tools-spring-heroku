@@ -1,4 +1,4 @@
-package com.figueroa.controller;
+package com.figueroa.nlp;
 
 public class Greeting {
 
