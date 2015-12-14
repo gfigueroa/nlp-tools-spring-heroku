@@ -15,20 +15,20 @@ import java.io.InputStreamReader;
 public class NLPMain {
 
 	// Resources
-	private final static String RESOURCES_PATH = 
+	public final static String RESOURCES_PATH = 
 			"WEB-INF" + File.separator + "resources" + File.separator;
 	
     // POSTagger and Lemmatizer
-    private final static String POS_TAGGER_MODEL_PATH =
+	public final static String POS_TAGGER_MODEL_PATH =
     		RESOURCES_PATH +
             "pos_models" + File.separator + "english-left3words-distsim.tagger";
     
-    private final static String POS_TAGGER_CONFIG_PATH =
+	public final static String POS_TAGGER_CONFIG_PATH =
     		RESOURCES_PATH +
             "pos_models" +  File.separator + "english-left3words-distsim.tagger.props";
     
-    private final static String TAG_SEPARATOR = "_";
-    private final static String WN_HOME = RESOURCES_PATH + "WordNet-3.0";
+	public final static String TAG_SEPARATOR = "_";
+	public final static String WN_HOME = RESOURCES_PATH + "WordNet-3.0";
     
     private POSTagger posTagger;
     private Lemmatizer lemmatizer;
@@ -110,7 +110,8 @@ public class NLPMain {
             System.out.println();
         }
         System.out.println("***************************************************");
-        System.out.println("Text lemmatized successfully for files in directory: " + dataDirectory);
+        System.out.println("Text lemmatized successfully for files in directory: " + 
+        		dataDirectory);
     }
 
     private void stemFiles(String dataDirectory) {
@@ -164,7 +165,8 @@ public class NLPMain {
             System.out.println();
         }
         System.out.println("***************************************************");
-        System.out.println("Text lemmatized successfully for files in directory: " + dataDirectory);
+        System.out.println("Text lemmatized successfully for files in directory: " + 
+        		dataDirectory);
     }
 
     /**

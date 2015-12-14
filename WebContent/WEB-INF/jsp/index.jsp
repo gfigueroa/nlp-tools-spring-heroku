@@ -8,14 +8,14 @@
     <head>
         <title>NLP Tools</title>
     </head>
-
+	
     <body>
+    	<center>
         <a href="index.html">Home</a>
         <h1>NLP Tools</h1>
-        <ul>  
-            <li><a href="lemmatizer.html">Lemmatizer</a></li>
-            <li><a href="tagger.html">POS Tagger</a></li>
-        </ul>
-                
+            <a href="lemmatizer.html">Lemmatizer</a>
+            <br/>
+            <a href="tagger.html">POS Tagger</a>
+        </center>
      </body>
  </html>

@@ -10,6 +10,6 @@ public class IndexController {
     @RequestMapping(value={"/", "index", ""}, method = RequestMethod.GET)
     public String getPage() {
         // Prepare the result view:
-        return "//index";
+        return "/index";
     }
 }
