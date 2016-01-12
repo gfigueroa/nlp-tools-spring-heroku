@@ -16,6 +16,8 @@
             <a href="lemmatizer.html">Lemmatizer</a>
             <br/>
             <a href="tagger.html">POS Tagger</a>
+            <br/>
+            <a href="keywords.html">Keyword Extraction</a>
         </center>
      </body>
  </html>

@@ -38,9 +38,9 @@ public class WebServiceController {
     		HttpServletRequest request) throws Exception {
     	
     	String contextPath = request.getSession().getServletContext().getRealPath("");
-        NLPMain nlpMain = new NLPMain(contextPath);
+        //NLPMain nlpMain = new NLPMain(contextPath);
         
-        String lemmatizedText = nlpMain.lemmatizeText(text);
+        String lemmatizedText = NLPMain.lemmatizeText(contextPath, text);
         
     	LemmatizedTextJSON lt = new LemmatizedTextJSON(text, lemmatizedText);
     	
@@ -54,9 +54,9 @@ public class WebServiceController {
     		HttpServletRequest request) throws Exception {
     	
     	String contextPath = request.getSession().getServletContext().getRealPath("");
-        NLPMain nlpMain = new NLPMain(contextPath);
+        //NLPMain nlpMain = new NLPMain(contextPath);
         
-        String taggedText = nlpMain.tagText(text);
+        String taggedText = NLPMain.tagText(contextPath, text);
         
         TaggedTextJSON tt = new TaggedTextJSON(text, taggedText);
     	

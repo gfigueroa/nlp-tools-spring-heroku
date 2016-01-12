@@ -37,13 +37,13 @@ public class TaggerController {
     public String tagText(ModelMap model, HttpServletRequest request) {
         
         String contextPath = request.getSession().getServletContext().getRealPath("");
-        NLPMain stemmer = new NLPMain(contextPath);
+        //NLPMain stemmer = new NLPMain(contextPath);
         
         try {
             String taggedText;
             String text = request.getParameter("text");
             if (text != null) {
-                taggedText = stemmer.tagText(text);
+                taggedText = NLPMain.tagText(contextPath, text);
             }
             else {
                 text = "";

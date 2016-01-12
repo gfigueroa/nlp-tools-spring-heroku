@@ -37,13 +37,13 @@ public class LemmatizerController {
     public String stemText(ModelMap model, HttpServletRequest request) {
         
         String contextPath = request.getSession().getServletContext().getRealPath("");
-        NLPMain lemmatizer = new NLPMain(contextPath);
+        //NLPMain lemmatizer = new NLPMain(contextPath);
         
         try {
             String lemmatizedText;
             String text = request.getParameter("text");
             if (text != null) {
-                lemmatizedText = lemmatizer.lemmatizeText(text);
+                lemmatizedText = NLPMain.lemmatizeText(contextPath, text);
             }
             else {
                 text = "";
