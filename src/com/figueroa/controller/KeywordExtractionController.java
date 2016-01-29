@@ -1,5 +1,6 @@
 package com.figueroa.controller;
  
+import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.NLPMain;
 
 import java.util.ArrayList;
@@ -45,9 +46,9 @@ public class KeywordExtractionController {
             String text = request.getParameter("text");
             String keywordsText = "";
             if (text != null) {
-                ArrayList<String> keywords = 
+                ArrayList<KeyPhrase> keywords = 
                 		NLPMain.extractKeywords(contextPath, text);
-                for (String keyword : keywords) {
+                for (KeyPhrase keyword : keywords) {
                 	keywordsText += keyword + "\n";
                 }
             }

@@ -3,7 +3,9 @@ package com.figueroa.nlp;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
+import com.figueroa.controller.WebServiceController.KeywordListJSON;
 import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.MetricVector;
 import com.figueroa.nlp.textrank.TextRank;
@@ -113,7 +115,7 @@ public class NLPMain {
         return taggedText;
     }
     
-    public static ArrayList<String> extractKeywords(String contextPath, String text) throws Exception {
+    public static ArrayList<KeyPhrase> extractKeywords(String contextPath, String text) throws Exception {
     	// Check if path ends with separator
     	if (!contextPath.endsWith(File.separator)) {
     		contextPath += File.separator;
@@ -125,12 +127,15 @@ public class NLPMain {
 		TextRank textRank = new TextRank(exceptionLogger, stopwords, languageModel);
 		
 		Collection<MetricVector> metricVectorCollection = textRank.run(text);
-		ArrayList<String> keywords = new ArrayList<>();
+		ArrayList<KeyPhrase> keywords = new ArrayList<>();
+		
 		for (MetricVector metricVector : metricVectorCollection) {
 			String keyword = metricVector.value.text;
 			double score = metricVector.metric;
-			keywords.add(keyword + " " + score);
+			KeyPhrase keyphrase = new KeyPhrase(keyword, score);
+			keywords.add(keyphrase);
 		}
+		Collections.sort(keywords);
 		
 		return keywords;
     }

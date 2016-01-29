@@ -9,12 +9,12 @@
 		<h1>Keyword Extraction</h1>
 		<h2>Text</h2>
 		<form method="POST" action="keywords.html">
-			<textarea name="text" rows="10" cols="50">${text}</textarea>
+			<textarea name="text" rows="12" cols="80">${text}</textarea>
 			<br> <input type="submit" value="Extract keywords!" />
 		</form>
 
 		<h2>Keywords</h2>
-		<textarea name="text" rows="10" cols="50" disabled>${keywordsText}</textarea>
+		<textarea name="text" rows="12" cols="80" disabled>${keywordsText}</textarea>
 	</center>
 </body>
 </html>
