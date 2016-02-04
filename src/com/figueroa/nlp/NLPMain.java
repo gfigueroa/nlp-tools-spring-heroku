@@ -74,6 +74,7 @@ public class NLPMain {
     
     /**
      * Lemmatize each term in a given string.
+     * @param contextPath the absolute root path of the project
      * @param text
      * @return the lemmatized text
      * @throws Exception
@@ -97,6 +98,7 @@ public class NLPMain {
     /**
      * Assign POS tags to each term in the given string. 
      * Uses the Penn Treebank tagset.
+     * @param contextPath the absolute root path of the project
      * @param text
      * @return the POS-tagged text
      * @throws Exception
@@ -115,6 +117,13 @@ public class NLPMain {
         return taggedText;
     }
     
+    /**
+     * Extract keywords from a given text using the TextRank algorithm
+     * @param contextPath the absolute root path of the project
+     * @param text
+     * @return an ArrayList of KeyPhrase
+     * @throws Exception
+     */
     public static ArrayList<KeyPhrase> extractKeywords(String contextPath, String text) throws Exception {
     	// Check if path ends with separator
     	if (!contextPath.endsWith(File.separator)) {
