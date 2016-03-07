@@ -17,4 +17,26 @@ public class IndexController {
         // Prepare the result view:
         return "/index";
     }
+    
+    @RequestMapping(value={"/sample"}, method = RequestMethod.GET)
+    /**
+     * Handles a GET request for the sample page of the site.
+     * It accepts "/sample".
+     * @return the result view
+     */
+    public String getSamplePage() {
+        // Prepare the result view:
+        return "/sample";
+    }
+    
+    @RequestMapping(value={"/index_new"}, method = RequestMethod.GET)
+    /**
+     *  Handles a GET request for the NEW index page of the site.
+     * It accepts "/index_new".
+     * @return the result view
+     */
+    public String getNewIndexPage() {
+        // Prepare the result view:
+        return "/index_new";
+    }
 }

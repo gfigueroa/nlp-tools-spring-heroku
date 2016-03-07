@@ -31,7 +31,7 @@ public class NLPMain {
 	
 	// Resources
 	public final static String RESOURCES_PATH = 
-			"WEB-INF" + File.separator + "resources" + File.separator;
+			/*"WEB-INF" + */File.separator + "resources" + File.separator;
 	
     // POSTagger and Lemmatizer
 	public final static String POS_TAGGER_MODEL_PATH =

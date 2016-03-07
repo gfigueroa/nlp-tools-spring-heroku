@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.NLPMain;
 
+/**
+ * Controller for all web service calls.
+ * All web service calls use the mapping "/ws/"
+ * @author Figueroa
+ *
+ */
 @RestController
 @RequestMapping("/ws/")
 public class WebServiceController {
@@ -43,6 +49,17 @@ public class WebServiceController {
 		}
 	}
 	
+	/**
+	 * Web service to lemmatize a given text
+	 * @param text
+	 * @param request the HTTP servlet request
+	 * @return a LemmatizedTextJSON instance representing the requested service
+	 * {
+	 *   "originalText":"worlds",
+	 *   "lemmatizedText":"world"
+	 * }
+	 * @throws Exception
+	 */
     @RequestMapping(value = "/lemmatize", method = RequestMethod.GET, 
     		headers="Accept=application/json")
     public LemmatizedTextJSON lemmatizeText(
@@ -59,6 +76,17 @@ public class WebServiceController {
     	return lt;
     }
     
+	/**
+	 * Web service to POS-tag a given text
+	 * @param text
+	 * @param request the HTTP servlet request
+	 * @return a TaggedTextJSON instance representing the requested service
+	 * {
+	 *   "originalText":"worlds",
+	 *   "taggedText":"worlds_NNS"
+	 * }
+	 * @throws Exception
+	 */
     @RequestMapping(value = "/tag", method = RequestMethod.GET, 
     		headers="Accept=application/json")
     public TaggedTextJSON tagText(
@@ -75,6 +103,38 @@ public class WebServiceController {
     	return tt;
     }
     
+    /**
+	 * Web service to extract the keywords of a given text
+	 * @param text
+	 * @param method the keyword extraction method.
+	 * Possible values are: "textrank" (default="textrank")
+	 * @param request the HTTP servlet request
+	 * @return a KeywordListJSON instance representing the requested service
+	 * {
+	 *   "originalText":"Daallo Airlines Flight 159 makes a successful emergency 
+	 *   landing after an explosion aboard kills one person and injures three.",
+	 *   "keywords":
+	 *   [
+	 *   {
+	 *     "text":"airlines flight",
+	 *     "score":0.5773502691896257
+	 *   },
+	 *   {
+	 *     "text":"successful emergency landing",
+	 *     "score":0.39145289597815713
+	 *   },
+	 *   {
+	 *     "text":"person",
+	 *     "score":0.05258928570117398
+	 *   },
+	 *   {
+	 *     "text":"explosion",
+	 *     "score":0.0
+	 *   }
+	 *   ]
+	 * }
+	 * @throws Exception
+	 */
     @RequestMapping(value = "/keywords", method = RequestMethod.GET, 
     		headers="Accept=application/json")
     public KeywordListJSON extractKeywords(
