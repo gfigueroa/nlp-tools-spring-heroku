@@ -13,40 +13,50 @@
 	</div>
 	<!--/.HEADER LINE END-->
 
-
 	<div class="row">
 
 		<div class="col-lg-4  col-md-4 col-sm-4"
 			data-scroll-reveal="enter from the bottom after 0.4s">
 			<div class="about-div">
-				<i class="fa fa-paper-plane-o fa-4x icon-round-border"></i>
+				<i class="fa fa-filter fa-4x icon-round-border"></i>
 				<h3>Text Lemmatization</h3>
 				<hr />
 				<hr />
 				<p>Lemmatize any text using the WordNet dictionary.</p>
-				<a href="#" class="btn btn-info btn-set">Lemmatize!</a>
+				<a href="lemmatizer.html" class="btn btn-info btn-set">Lemmatize!</a>
 			</div>
 		</div>
 		<div class="col-lg-4  col-md-4 col-sm-4"
 			data-scroll-reveal="enter from the bottom after 0.5s">
 			<div class="about-div">
-				<i class="fa fa-bolt fa-4x icon-round-border"></i>
+				<i class="fa fa-tags fa-4x icon-round-border"></i>
 				<h3>POS Tagging</h3>
 				<hr />
 				<hr />
 				<p>Tag any text with Penn Treebank tagset and applying a Stanford POS tagger.</p>
-				<a href="#" class="btn btn-info btn-set">Tag!</a>
+				<a href="tagger.html" class="btn btn-info btn-set">Tag!</a>
 			</div>
 		</div>
 		<div class="col-lg-4  col-md-4 col-sm-4"
 			data-scroll-reveal="enter from the bottom after 0.6s">
 			<div class="about-div">
-				<i class="fa fa-magic fa-4x icon-round-border"></i>
+				<i class="fa fa-key fa-4x icon-round-border"></i>
 				<h3>Keyword Extraction</h3>
 				<hr />
 				<hr />
 				<p>Extract the keywords from a text using a variety of methods.</p>
-				<a href="#" class="btn btn-info btn-set">Extract!</a>
+				<a href="keywords.html" class="btn btn-info btn-set">Extract!</a>
+			</div>
+		</div>
+		<div class="col-lg-4  col-md-4 col-sm-4"
+			data-scroll-reveal="enter from the bottom after 0.6s">
+			<div class="about-div">
+				<i class="fa fa-gears fa-4x icon-round-border"></i>
+				<h3>Web Services</h3>
+				<hr />
+				<hr />
+				<p>Use any of our tools in web-service mode.</p>
+				<a href="#" class="btn btn-info btn-set">Connect!</a>
 			</div>
 		</div>
 

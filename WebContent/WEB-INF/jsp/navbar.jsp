@@ -12,9 +12,9 @@
 		</div>
 		<div class="navbar-collapse collapse move-me">
 			<ul class="nav navbar-nav navbar-right">
-				<li><a href="index_new#home">HOME</a></li>
-				<li><a href="index_new#features-sec">FEATURES</a></li>
-				<li><a href="index_new#contact-sec">CONTACT</a></li>
+				<li><a href="<%= !request.getAttribute("javax.servlet.forward.request_uri").toString().endsWith("index") ? "index" : "" %>#home">HOME</a></li>
+				<li><a href="<%= !request.getAttribute("javax.servlet.forward.request_uri").toString().endsWith("index") ? "index" : "" %>#features-sec">FEATURES</a></li>
+				<li><a href="<%= !request.getAttribute("javax.servlet.forward.request_uri").toString().endsWith("index") ? "index" : "" %>#contact-sec">CONTACT</a></li>
 			</ul>
 		</div>
 

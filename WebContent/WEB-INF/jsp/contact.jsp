@@ -8,9 +8,8 @@
 					<h1 data-scroll-reveal="enter from the bottom after 0.1s"
 						class="header-line">CONTACT US</h1>
 					<p data-scroll-reveal="enter from the bottom after 0.3s">
-						Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean
-						commodo. Lorem ipsum dolor sit amet, consectetuer adipiscing
-						elit. Aenean commodo.</p>
+						Feel free to contact us if you have any questions, comments or suggestions.
+					</p>
 				</div>
 
 			</div>
