@@ -1,0 +1,146 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: NLP Tools API
+  description: RESTful API to use the various tools provided by the NLP Web Tools site.
+  termsOfService: https://nlp-tools-java.herokuapp.com/terms
+  contact:
+    name: Gerardo Figueroa
+    email: gerardo_ofc@yahoo.com
+    url: http://idea.cs.nthu.edu.tw
+  license:
+    name: GPL
+    url: https://opensource.org/licenses/gpl-license
+# host: nlp-tools-java.herokuapp.com
+host: localhost:8080
+basePath: /NLP_Web/ws
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/text
+paths:
+  /lemmatize:
+    get:
+      tags:
+      - Lemmatize Text
+      description: Lemmatizes a given text.
+      operationId: lemmatize
+      produces:
+      - application/json
+      parameters:
+      - name: text
+        in: query
+        description: The text to lemmatize.
+        required: true
+        type: string
+      responses:
+        200:
+          description: Lemmatized text.
+          schema:
+            $ref: '#/definitions/LemmatizedText'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /tag:
+    get:
+      tags:
+      - Tag Text
+      description: POS-tags a given text.
+      operationId: tag
+      produces:
+      - application/json
+      parameters:
+      - name: text
+        in: query
+        description: The text to tag.
+        required: true
+        type: string
+      responses:
+        200:
+          description: Tagged text
+          schema:
+            $ref: '#/definitions/TaggedText'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /keywords:
+    get:
+      tags:
+      - Extract Keywords
+      description: Extracts the keywords of a given text.
+      operationId: keywords
+      produces:
+      - application/json
+      parameters:
+      - name: text
+        in: query
+        description: The text whose keywords will be extracted.
+        required: true
+        type: string
+      - name: method
+        in: query
+        description: The keyword extraction method to use. Available methods are [textrank, ].
+        required: false
+        type: string
+        default: textrank
+      responses:
+        200:
+          description: Keyword list
+          schema:
+            $ref: '#/definitions/KeywordList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  LemmatizedText:
+    type: object
+    properties:
+      originalText:
+        type: string
+        description: The original text.
+      lemmatizedText:
+        type: string
+        description: The lemmatized text.
+  TaggedText:
+    type: object
+    properties:
+      originalText:
+        type: string
+        description: The original text.
+      taggedText:
+        type: string
+        description: The tagged text.
+  KeyWord:
+    type: object
+    properties:
+      text:
+        type: string
+        description: The keyword text.
+      score:
+        type: number
+        description: The keyword score assigned by the method.
+  KeywordList:
+    type: object
+    properties:
+      originalText:
+        type: string
+        description: The original text.
+      keywords:
+        type: array
+        items:
+          $ref: '#/definitions/KeyWord'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string

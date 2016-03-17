@@ -51,12 +51,18 @@
 		<div class="col-lg-4  col-md-4 col-sm-4"
 			data-scroll-reveal="enter from the bottom after 0.6s">
 			<div class="about-div">
+
+			</div>
+		</div>
+		<div class="col-lg-4  col-md-4 col-sm-4"
+			data-scroll-reveal="enter from the bottom after 0.6s">
+			<div class="about-div">
 				<i class="fa fa-gears fa-4x icon-round-border"></i>
 				<h3>Web Services</h3>
 				<hr />
 				<hr />
 				<p>Use any of our tools in web-service mode.</p>
-				<a href="#" class="btn btn-info btn-set">Connect!</a>
+				<a href="ws/api-docs/api-docs.html" class="btn btn-info btn-set" target="_blank">Connect!</a>
 			</div>
 		</div>
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,8 @@ import com.figueroa.nlp.NLPMain;
 @RestController
 @RequestMapping("/ws/")
 public class WebServiceController {
+	
+	private static final Logger logger = Logger.getLogger(WebServiceController.class);
 	
 	private class LemmatizedTextJSON {
 		public String originalText;
@@ -60,12 +63,15 @@ public class WebServiceController {
 	 * }
 	 * @throws Exception
 	 */
-    @RequestMapping(value = "/lemmatize", method = RequestMethod.GET, 
-    		headers="Accept=application/json")
+//    @RequestMapping(value = "/lemmatize", method = RequestMethod.GET, 
+//    		headers={"Accept=application/json", "Access-Control-Allow-Origin=*", 
+//			"Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept"})
+	@RequestMapping(value = "/lemmatize", method = RequestMethod.GET, 
+    		headers={"Accept=application/json"})
     public LemmatizedTextJSON lemmatizeText(
     		@RequestParam(value="text", defaultValue="") String text,
     		HttpServletRequest request) throws Exception {
-    	
+		
     	String contextPath = request.getSession().getServletContext().getRealPath("");
         //NLPMain nlpMain = new NLPMain(contextPath);
         
@@ -87,8 +93,11 @@ public class WebServiceController {
 	 * }
 	 * @throws Exception
 	 */
+//    @RequestMapping(value = "/tag", method = RequestMethod.GET, 
+//    		headers={"Accept=application/json", "Access-Control-Allow-Origin=*", 
+//			"Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept"})
     @RequestMapping(value = "/tag", method = RequestMethod.GET, 
-    		headers="Accept=application/json")
+			headers={"Accept=application/json"})
     public TaggedTextJSON tagText(
     		@RequestParam(value="text", defaultValue="") String text,
     		HttpServletRequest request) throws Exception {
@@ -135,8 +144,11 @@ public class WebServiceController {
 	 * }
 	 * @throws Exception
 	 */
+//    @RequestMapping(value = "/keywords", method = RequestMethod.GET, 
+//    		headers={"Accept=application/json", "Access-Control-Allow-Origin=*", 
+//    				"Access-Control-Allow-Headers=Origin,X-Requested-With,Content-Type,Accept"})
     @RequestMapping(value = "/keywords", method = RequestMethod.GET, 
-    		headers="Accept=application/json")
+    		headers={"Accept=application/json"})
     public KeywordListJSON extractKeywords(
     		@RequestParam(value="text", defaultValue="") String text,
     		@RequestParam(value="method", defaultValue="textrank") String method,

@@ -30,7 +30,7 @@ public class IndexController {
     }
     
     @RequestMapping(value={"/index_new"}, method = RequestMethod.GET)
-    /**
+    /**	
      *  Handles a GET request for the NEW index page of the site.
      * It accepts "/index_new".
      * @return the result view

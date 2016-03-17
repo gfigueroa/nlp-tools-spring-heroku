@@ -33,8 +33,8 @@
 							<!-- Slider 04 -->
 							<li>
 								<h3>NLP Web Tools</h3>
-								<h1>WEB SERVICES</h1> <a href="#" class="btn btn-success btn-lg"> CONNECT </a> 
-								<a href="#" class="btn btn-info btn-lg"> FEATURE LIST </a>
+								<h1>WEB SERVICES</h1> <a href="ws/api-docs/api-docs.html" class="btn btn-success btn-lg" target="_blank"> CONNECT </a> 
+								<a href="#features-sec" class="btn btn-info btn-lg"> FEATURE LIST </a>
 							</li>
 							<!-- End Slider 04 -->
 						</ul>

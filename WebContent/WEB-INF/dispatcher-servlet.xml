@@ -9,26 +9,30 @@
         http://www.springframework.org/schema/context 
         http://www.springframework.org/schema/context/spring-context.xsd">
  
+ 	<!-- Spring will search in the below paths for controller and service annotations -->
 	<context:component-scan base-package="com.figueroa.controller" />
+	
 	<mvc:annotation-driven />
 	<mvc:default-servlet-handler/>
  
+ 	<!-- View resolvers can also be configured with ResourceBundles or XML files. 
+		If you need different view resolving based on Locale, you have to use the 
+		resource bundle resolver. -->
  	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"> 
 		<property name="viewClass"  value="org.springframework.web.servlet.view.JstlView" />  
 		<property name="prefix" value="/WEB-INF/jsp/" /> 
 		<property name="suffix" value=".jsp" /> 
-	</bean> 
- 
- 	<!--
-	<bean id="viewResolver"
-		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
-		<property name="viewClass"
-			value="org.springframework.web.servlet.view.JstlView" />
-		<property name="prefix" value="/WEB-INF/jsp/" />
-		<property name="suffix" value=".jsp" />
 	</bean>
-	-->
 	
 	<mvc:resources mapping="/resources/**" location="/resources/" />
+	
+	<mvc:resources mapping="/ws/api-docs/**" location="/WEB-INF/swagger/" />
+	
+	<!-- The following tags are shortcuts for defining a ParameterizableViewController 
+		that immediately forwards to a view when invoked. They are used in static cases 
+		when there is no Java Controller logic to execute before the view generates 
+		the response. 
+	<mvc:view-controller path="/swagger/index.html" view-name="swagger/index"/>
+	-->
  
 </beans>
