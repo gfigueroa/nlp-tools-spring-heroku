@@ -9,17 +9,19 @@ info:
     email: gerardo_ofc@yahoo.com
     url: http://idea.cs.nthu.edu.tw
   license:
-    name: GPL
-    url: https://opensource.org/licenses/gpl-license
+    name: GPL-3.0
+    url: https://opensource.org/licenses/GPL-3.0
+
+# host: localhost:8080
 # host: nlp-tools-java.herokuapp.com
-host: localhost:8080
-basePath: /NLP_Web/ws
+# basePath: /NLP_Web/ws
+basePath: /ws
 schemes:
 - http
 consumes:
 - application/json
 produces:
-- application/text
+- application/json
 paths:
   /lemmatize:
     get:
