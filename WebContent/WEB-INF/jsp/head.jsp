@@ -30,4 +30,8 @@
 	<script src="resources/js/jquery.easing.min.js"></script>
 	<!--  Custom Scripts -->
 	<script src="resources/js/custom.js"></script>
+	
+	<link rel="icon" 
+      type="image/png" 
+      href="resources/img/favicon.png">
 </head>

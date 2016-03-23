@@ -34,8 +34,7 @@
 								placeholder="Message"></textarea>
 						</div>
 						<div class="form-group">
-							<button type="submit" class="btn btn-info btn-block btn-lg">SUBMIT
-								REQUEST</button>
+							<button type="submit" class="btn btn-info btn-block btn-lg">SUBMIT REQUEST</button>
 						</div>
 
 					</form>
@@ -63,7 +62,8 @@
 					<strong>Call:</strong> +886 3-571-5131 ext. 80916
 				</h4>
 				<h4>
-					<strong>Email: </strong> gerardo_ofc@yahoo.com
+					<strong>Email: </strong>
+					<a href="mailto:gerardo_ofc@yahoo.com?Subject=NLP%20Web%20Tools" target="_blank">gerardo_ofc@yahoo.com</a>
 				</h4>
 			</div>
 
