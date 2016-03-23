@@ -1,6 +1,12 @@
 # Online Java NLP Tools
 
 Simple Java Maven web project for NLP tools running on Spring MVC.
+Implements the following frameworks and tools:
+- Spring MVC
+- RESTful web services
+- Swagger API documentation
+- Stanford NLP tools
+- WordNet
 
 ## Installation
 
@@ -8,7 +14,8 @@ Requires Java 7, Eclipse 4.5.1 (Mars), Apache Maven 3.3.3, a Java web server (e.
 
 ## Usage
 
-The site can be access with the following [link](https://nlp-tools-java.herokuapp.com/)
+The app has been launched on Heroku.
+The site can be accessed with the following [link](http://nlp-tools-java.herokuapp.com/)
 
 ## Contributing
 
