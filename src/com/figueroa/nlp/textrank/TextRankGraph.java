@@ -40,6 +40,8 @@ import java.util.HashMap;
 import java.util.TreeMap;
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math.util.MathUtils;
+import com.figueroa.nlp.KeyPhrase;
+import com.figueroa.nlp.rankup.KeyPhraseGraph;
 import com.figueroa.nlp.Node;
 import com.figueroa.util.ExceptionLogger;
 import com.figueroa.util.ExceptionLogger.DebugLevel;
@@ -239,4 +241,175 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
                 + (dist_stats.getStandardDeviation() * INCLUSIVE_COEFF);
     }
     
+    /**
+     * Print graph in text mode
+     * @param keyphraseGraph
+     * @param logger 
+     */
+    public void printGraph(KeyPhraseGraph keyphraseGraph, ExceptionLogger logger) {
+        logger.debug("", DebugLevel.DETAIL);
+        logger.debug("*** TextRank Graph ***", DebugLevel.DETAIL);
+        for (TextRankNode node : this.values()) {
+            
+            // Skip SynsetLink nodes
+            if (node.value instanceof SynsetLink) {
+                continue;
+            }
+            
+            KeyPhrase keyphrase = keyphraseGraph.get(node.key);
+            String nodeString = node.toString(keyphrase);
+            
+            HashMap<Node, Double> previousEdges = node.getPreviousEdges();
+            HashMap<Node, Double> edges = node.getEdges();
+
+            logger.debug(nodeString, DebugLevel.DETAIL);
+            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            for (Node edgeNode : edges.keySet()) {
+                KeyPhrase edgeKeyphrase = keyphraseGraph.get(edgeNode.key);
+                // Skip SynsetLink nodes
+//                if (edgeNode.value instanceof SynsetLink) {
+//                    continue;
+//                }
+                
+                String edgeText = edgeNode.toString(edgeKeyphrase);
+                double previousEdgeWeight = previousEdges.get(edgeNode) != null ?
+                        previousEdges.get(edgeNode) : -1.0;
+                double edgeWeight = edges.get(edgeNode);
+                
+                String edgeInformation = "\t\t" + edgeText +
+                        " - w: " + MathUtils.round(edgeWeight, 2);
+                edgeInformation += " (P: " + MathUtils.round(previousEdgeWeight, 2) +
+                        ")";
+                logger.debug(edgeInformation , DebugLevel.DETAIL);
+            }
+        }
+        
+        Double keyphraseFinalTextRankScoreCorrectness = 
+                keyphraseGraph.getKeyphraseFinalTextRankScoreCorrectness();
+        Double textRankNodeScoreCorrectness = keyphraseGraph.getTextRankNodeScoreCorrectness();
+        logger.debug("", DebugLevel.DETAIL);
+        logger.debug("Keyphrase final TextRank score correctness: " + 
+                (keyphraseFinalTextRankScoreCorrectness != null ?
+                        MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2) :
+                        ""), DebugLevel.DETAIL);
+        logger.debug("TextRank node score correctness: " + 
+                (textRankNodeScoreCorrectness != null ?
+                        MathUtils.round(textRankNodeScoreCorrectness, 2) :
+                        ""), DebugLevel.DETAIL);
+        logger.debug("", DebugLevel.DETAIL);
+        logger.debug("**********************", DebugLevel.DETAIL);
+    }
+    
+    /**
+     * Print graph in text mode
+     * @param logger 
+     */
+    public void printGraph(ExceptionLogger logger) {
+        logger.debug("", DebugLevel.DETAIL);
+        logger.debug("*** TextRank Graph ***", DebugLevel.DETAIL);
+        for (Node node : this.values()) {
+            String nodeString = node.toString();
+            
+            HashMap<Node, Double> previousEdges = node.getPreviousEdges();
+            HashMap<Node, Double> edges = node.getEdges();
+
+            logger.debug(nodeString, DebugLevel.DETAIL);
+            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            for (Node edgeNode : edges.keySet()) {
+                
+                String edgeText = edgeNode.toString();
+                double previousEdgeWeight = previousEdges.get(edgeNode) != null ?
+                        previousEdges.get(edgeNode) : -1.0;
+                double edgeWeight = edges.get(edgeNode);
+                
+                String edgeInformation = "\t\t" + edgeText +
+                        " - w: " + MathUtils.round(edgeWeight, 2);
+                edgeInformation += " (P: " + MathUtils.round(previousEdgeWeight, 2) +
+                        ")";
+                logger.debug(edgeInformation , DebugLevel.DETAIL);
+            }
+        }
+        logger.debug("**********************", DebugLevel.DETAIL);
+    }
+    
+    /**
+     * Print graph in Gephi-readable format.
+     * Gephi format:
+     *  ;A;B;C;D;E
+     *  A;0;1;0;1;0
+     *  B;1;0;0;0;0
+     *  C;0;0;1;0;0
+     *  D;0;1;0;1;0
+     *  E;0;0;0;0;0
+     * @param abstractId
+     * @param run
+     */
+    public void printGephiGraph(int abstractId, int run) {
+        
+        try {
+            BufferedWriter writer = 
+                    new BufferedWriter(new FileWriter(
+                            GEPHI_LOGGER_DIR + 
+                            "abs_" + abstractId + "-it_" + run + ".csv", true));
+        
+            System.out.println("*** TextRank Graph ***");
+
+            // First, print top header (node names)
+            for (TextRankNode node: this.values()) {
+                // Skip SynsetLink nodes
+                if (node.value instanceof SynsetLink) {
+                    continue;
+                }
+
+                String nodeString = ";\"" + node.value.text;
+                nodeString += " [" + MathUtils.round(node.getRank(), 2) + "]";
+                System.out.print(nodeString);
+                writer.write(nodeString);
+            }
+            System.out.println(";");
+            writer.write(";");
+            writer.newLine();
+
+            // Then, print each row
+            for (TextRankNode node : this.values()) {
+                // Skip SynsetLink nodes
+                if (node.value instanceof SynsetLink) {
+                    continue;
+                }
+
+                // Print row header (node name)
+                String nodeString = "\"" + node.value.text;
+                nodeString += " [" + MathUtils.round(node.getRank(), 2) + "];";
+                System.out.print(nodeString);
+                writer.write(nodeString);
+
+                // Print edge weights
+                HashMap<Node, Double> nodeEdges = node.getEdges();
+                String edgeText = "";
+                for (TextRankNode node2 : this.values()) {
+                    // Skip SynsetLink nodes
+                    if (node2.value instanceof SynsetLink) {
+                        continue;
+                    }
+
+                    Double edgeWeight = nodeEdges.get(node2);
+                    edgeText += 
+                            edgeWeight != null ? 
+                            String.valueOf(MathUtils.round(edgeWeight, 2)) : "0";
+                    edgeText += ";";
+                }
+                // Remove last semicolon
+                edgeText = edgeText.substring(0, edgeText.length() - 1);
+                System.out.println(edgeText);
+                writer.write(edgeText);
+                writer.newLine();
+            }
+            System.out.println();
+            writer.close();
+        }
+        catch (Exception e) {
+            System.err.println("Exception in printGephiGraph: " + e.getMessage());
+        }
+
+    }
 }

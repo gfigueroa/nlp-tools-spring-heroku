@@ -26,7 +26,6 @@ import java.util.*;
 public class POSTagger {
 
     private String modelFile;
-    private String configFile;
     private MaxentTagger tagger;
     private String separator;
     private HashMap<String, POS> posTags; // A mapping between Penn Treebank Tagset and Wordnet POS Tags
@@ -39,9 +38,8 @@ public class POSTagger {
      * @param configF: the configuration file directory
      * @param sep: the default separator between a term and a POS tag
      */
-    public POSTagger(String modelF, String configF, String sep) {
+    public POSTagger(String modelF, String sep) {
         modelFile = modelF;
-        configFile = configF;
         separator = sep;
 
         posTags = createPOSTags();

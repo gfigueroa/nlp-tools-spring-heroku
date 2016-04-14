@@ -4,6 +4,7 @@ import java.util.HashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.figueroa.util.MiscUtils;
+import com.figueroa.nlp.KeyPhrase;
 
 /**
  * Implements a node in the RankUp graph, denoting some word or keyword
@@ -16,7 +17,8 @@ import com.figueroa.util.MiscUtils;
  */
 public abstract class Node implements Comparable<Node> {
     
-    private final static Log log_ = LogFactory.getLog(Node.class.getName());
+    @SuppressWarnings("unused")
+	private final static Log log_ = LogFactory.getLog(Node.class.getName());
     public final static Double DEFAULT_EDGE_WEIGHT = 1.0;
     
     /**
@@ -25,13 +27,13 @@ public abstract class Node implements Comparable<Node> {
     //public HashSet<Node> edges = new HashSet<Node>();
     public String key = null;
     public boolean marked = false;
+    public final String text;
+    public double rank = 0.0D;
     protected double expectedScore;
     
     /**
      * Protected members.
      */
-    protected final String text;
-    protected double rank = 0.0D;
     protected double previousRank;
     protected double originalRank;
     protected double d_j; // Differential value used in RankUp (equations 3.25 and 3.27)
@@ -231,6 +233,37 @@ public abstract class Node implements Comparable<Node> {
         output += adjustedText;
         output += "r: " + rankString;
         output += " (P: " + previousRankString + ")";
+        output += ", d: " + d_jString;
+        output += " (P: " + previous_d_jString + ")";
+            
+        return output;
+    }
+    
+    public String toString(KeyPhrase keyphrase) {
+        String output = "";
+
+        String adjustedText = this.text;
+        while (adjustedText.length() < 45) {
+            adjustedText = adjustedText.concat(" ");
+        }
+        
+        String previousRankString = 
+                MiscUtils.convertDoubleToFixedCharacterString(previousRank, 2);
+        String rankString = MiscUtils.convertDoubleToFixedCharacterString(rank, 2);
+        
+        String previous_d_jString =
+                MiscUtils.convertDoubleToFixedCharacterString(previous_d_j, 2);
+        String d_jString =
+                MiscUtils.convertDoubleToFixedCharacterString(d_j, 2);
+        
+        output += adjustedText;
+        output += "r: " + rankString;
+        output += " (P: " + previousRankString + ")";
+        output += " [" + (keyphrase != null ? KeyPhrase.getScoreDirectionString(
+                        keyphrase.getCurrentNodeScoreDirection()) : "-") +
+                " (" + (keyphrase != null ? MiscUtils.getBooleanCheckString(
+                        keyphrase.textRankNodeScoreDirectionIsCorrect()) : "-") +
+                ")]";
         output += ", d: " + d_jString;
         output += " (P: " + previous_d_jString + ")";
             

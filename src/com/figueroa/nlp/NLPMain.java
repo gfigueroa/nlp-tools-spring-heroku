@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.figueroa.controller.WebServiceController.KeywordListJSON;
 import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.MetricVector;
 import com.figueroa.nlp.textrank.TextRank;
@@ -87,7 +86,7 @@ public class NLPMain {
     	
     	// Load POSTagger
         POSTagger posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, 
-        		contextPath + POS_TAGGER_CONFIG_PATH, TAG_SEPARATOR);
+        		TAG_SEPARATOR);
     	// Load Lemmatizer
         Lemmatizer lemmatizer = new Lemmatizer(contextPath + WN_HOME, posTagger);
         
@@ -111,7 +110,7 @@ public class NLPMain {
     	
     	// Load POSTagger
         POSTagger posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, 
-        		contextPath + POS_TAGGER_CONFIG_PATH, TAG_SEPARATOR);
+        		TAG_SEPARATOR);
         
         String taggedText = posTagger.tagText(text);
         return taggedText;
@@ -141,7 +140,7 @@ public class NLPMain {
 		for (MetricVector metricVector : metricVectorCollection) {
 			String keyword = metricVector.value.text;
 			double score = metricVector.metric;
-			KeyPhrase keyphrase = new KeyPhrase(keyword, score);
+			KeyPhrase keyphrase = new KeyPhrase(keyword, score, score, null);
 			keywords.add(keyphrase);
 		}
 		Collections.sort(keywords);

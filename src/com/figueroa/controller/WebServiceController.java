@@ -23,6 +23,7 @@ import com.figueroa.nlp.NLPMain;
 @RequestMapping("/ws/")
 public class WebServiceController {
 	
+	@SuppressWarnings("unused")
 	private static final Logger logger = Logger.getLogger(WebServiceController.class);
 	
 	private class LemmatizedTextJSON {
@@ -43,10 +44,19 @@ public class WebServiceController {
 		}
 	};
 	
+	public class KeyPhraseSimple {
+		public String text;
+		public double score;
+		public KeyPhraseSimple(String text, double score) {
+			this.text = text;
+			this.score = score;
+		}
+	}
+	
 	public class KeywordListJSON {
 		public String originalText;
-		public ArrayList<KeyPhrase> keywords;
-		public KeywordListJSON(String originalText, ArrayList<KeyPhrase> keywords) {
+		public ArrayList<KeyPhraseSimple> keywords;
+		public KeywordListJSON(String originalText, ArrayList<KeyPhraseSimple> keywords) {
 			this.originalText = originalText;
 			this.keywords = keywords;
 		}
@@ -158,7 +168,7 @@ public class WebServiceController {
         //NLPMain nlpMain = new NLPMain(contextPath);
         
     	ArrayList<KeyPhrase> keywords;
-    	
+    	ArrayList<KeyPhraseSimple> simpleKeywords = new ArrayList<>();    	
     	if (method.equalsIgnoreCase("textrank")) {
     		keywords = NLPMain.extractKeywords(contextPath, text);
     	}
@@ -166,7 +176,12 @@ public class WebServiceController {
     		return null;
     	}
     	
-    	KeywordListJSON keywordList = new KeywordListJSON(text, keywords);
+    	for (KeyPhrase keyphrase : keywords) {
+    		KeyPhraseSimple keyword = new KeyPhraseSimple(keyphrase.text, 
+    				keyphrase.getScore());
+    		simpleKeywords.add(keyword);
+    	}
+    	KeywordListJSON keywordList = new KeywordListJSON(text, simpleKeywords);
         
     	return keywordList;
     }

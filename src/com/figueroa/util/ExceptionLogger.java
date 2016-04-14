@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * Logger class
+ * Customized logger class.
  *
  * @author Gerardo Figueroa
  * Institute of Information Systems and Applications
@@ -28,6 +28,11 @@ public class ExceptionLogger {
         this.debugLevel = debugLevel;
     }
     
+    /**
+     * Get a DebugLevel enum type from a string
+     * @param debugLevelString
+     * @return a DebugLevel
+     */
     public static DebugLevel getDebugLevelFromString(String debugLevelString) {
         for (DebugLevel debugLevel : DebugLevel.values()) {
             if (debugLevelString.equalsIgnoreCase(debugLevel.toString())) {
@@ -38,6 +43,10 @@ public class ExceptionLogger {
         return null;
     }
 
+    /**
+     * Write a message to the log file.
+     * @param message 
+     */
     public void writeToLog(String message) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(logDirectory, true));
@@ -49,6 +58,12 @@ public class ExceptionLogger {
         }
     }
 
+    /**
+     * Print message on console. If debugLevel is ERROR, then the message is
+     * written to the log file.
+     * @param message
+     * @param debugLevel 
+     */
     public void debug(String message, DebugLevel debugLevel) {
         if (debugLevel.compareTo(this.debugLevel) >= 0) {
             String extraInfo = "";
@@ -64,6 +79,11 @@ public class ExceptionLogger {
         }
     }
 
+    /**
+     * Get a string representation of the current date and time.
+     * Default format is yyyy-MM-dd HHmmss.
+     * @return String with current datetime
+     */
     public static String now() {
         String DATE_FORMAT_NOW = "yyyy-MM-dd HHmmss";
         Calendar cal = Calendar.getInstance();
