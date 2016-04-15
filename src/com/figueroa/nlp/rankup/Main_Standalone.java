@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import org.apache.commons.math.util.MathUtils;
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
 import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
@@ -27,9 +29,6 @@ import com.figueroa.util.Abstract;
 import com.figueroa.util.Abstract.Type;
 import com.figueroa.util.AbstractManager;
 import com.figueroa.util.DatabaseManager;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
-import com.figueroa.util.PrecisionAnalyzer;
 
 /**
  * Main class for running RankUp
@@ -42,9 +41,10 @@ import com.figueroa.util.PrecisionAnalyzer;
  */
 public class Main_Standalone {
 
+	private static final Logger logger = Logger.getLogger(Main_Standalone.class);
+	
     // Runtime options
     // Debugging
-    public static DebugLevel DEBUG_LEVEL = DebugLevel.INFO;
     public final static int PROPERTIES_FILES_TO_PROCESS = 1; // 0 for no limit
     public final static int PROPERTIES_FILE_NUMBER_TO_PROCESS = 0; // 0 to ignore
     public final static boolean PRINT_RESULTS = false;
@@ -63,19 +63,6 @@ public class Main_Standalone {
     public final static boolean CORRECT_NEGATIVE_WEIGHTS = true;
     public final static boolean DENORMALIZE_MODIFICATION_VALUE = true;
     public final static boolean USE_DIFFERENTIAL_CONVERGENCE = true;
-    
-    // Loggers
-    public final static String EXCEPTION_LOGGER_DIR =
-            "." + File.separator + "logs" + File.separator
-            + "exception_log_" + ExceptionLogger.now() + ".log";
-    public final static ExceptionLogger exceptionLogger = 
-            new ExceptionLogger(EXCEPTION_LOGGER_DIR, DEBUG_LEVEL);
-    
-    public final static String DATA_LOGGER_DIR =
-            "." + File.separator + "logs" + File.separator
-            + "data_log_" + ExceptionLogger.now() + ".log";
-    public final static ExceptionLogger dataLogger = 
-            new ExceptionLogger(DATA_LOGGER_DIR, DEBUG_LEVEL);
     
     // DatabaseManager and AbstractManager
     public final static String HOST_IP = "140.114.77.17";
@@ -129,7 +116,7 @@ public class Main_Standalone {
     private static void loadComponents()
             throws Exception {
         
-        exceptionLogger.debug("Loading components...", DebugLevel.INFO);
+        logger.info("Loading components...");
         
         // Load Stopwords
         stopwords = new Stopwords();
@@ -137,14 +124,14 @@ public class Main_Standalone {
         // Load TextRank components
         languageModel = LanguageModel.buildLanguage(res_path, lang_code);
         WordNet.buildDictionary(res_path, lang_code);
-        //textRank = new TextRank(exceptionLogger, stopwords, languageModel);
+        //textRank = new TextRank(logger, stopwords, languageModel);
         
         // Load DatabaseManager
         databaseManager =
             new DatabaseManager(DB_CLASS_NAME, CONNECTION_STRING, USER, PASSWORD);
         
         // Load AbstractManager
-        abstractManager = new AbstractManager(databaseManager, exceptionLogger);
+        abstractManager = new AbstractManager(databaseManager);
         
         // Load POSTagger
         posTagger =
@@ -154,7 +141,7 @@ public class Main_Standalone {
         lemmatizer = new Lemmatizer(WN_HOME, posTagger);
         
         // Load and set up RAKE
-        rake = new Rake(exceptionLogger);
+        rake = new Rake();
     }
 
     /**
@@ -207,6 +194,25 @@ public class Main_Standalone {
         return propertiesList;
     }
 
+    /**
+     * Prints the given KeyPhrase list with a header
+     * @param keyPhrases
+     * @param method
+     * @param writeToDataLog 
+     */
+    public static void printKeyPhrases(List<KeyPhrase> keyPhrases, String method) {
+
+        logger.debug("");
+        logger.debug("***********" + method + "************");
+        logger.debug("*Size: " + keyPhrases.size() + "*");
+        for (KeyPhrase keyPhrase : keyPhrases) {
+            String features = keyPhrase.getFeatures() != null ?
+                    keyPhrase.getFeatures().toString() : "";
+            logger.debug(keyPhrase.toString() + "\t" + features);
+        }
+        logger.debug("");
+    }
+    
     /**
      * Gets a list of KeyPhrases ordered according to the given Feature
      * @param rankUp
@@ -272,22 +278,20 @@ public class Main_Standalone {
             keyphrases =
                     getFeatureKeyphrases(textRankKeyphrases, feature);
 
-            Main.printKeyPhrases(keyphrases, featureString, false);
+            printKeyPhrases(keyphrases, featureString);
 
             // Get KeyPhraseGraph
             if (PRINT_SETS) {
                 KeyPhraseGraph graph = new KeyPhraseGraph(
-                        exceptionLogger, 
                         keyphrases,
                         rankUpProperties.setAssignmentApproach,
                         rankUpProperties.featureLowerBound, 
                         rankUpProperties.featureUpperBound,
                         feature);
-                exceptionLogger.debug("**** " + featureString + " Sets ****", 
-                        DebugLevel.DEBUG);
-                graph.printFeatureSet(SetLevel.LOW, DebugLevel.DEBUG);
-                graph.printFeatureSet(SetLevel.MID, DebugLevel.DEBUG);
-                graph.printFeatureSet(SetLevel.HIGH, DebugLevel.DEBUG);
+                logger.debug("**** " + featureString + " Sets ****");
+                graph.printFeatureSet(SetLevel.LOW);
+                graph.printFeatureSet(SetLevel.MID);
+                graph.printFeatureSet(SetLevel.HIGH);
             }
         }
         return keyphrases;
@@ -321,14 +325,13 @@ public class Main_Standalone {
             
             String abstractSource = rankUpPropertiesList.get(0).abstractSource;
 
-            exceptionLogger.debug("Starting RankUp...", DebugLevel.INFO);
-            exceptionLogger.debug("Properties file: " + propertiesFile, 
-                    DebugLevel.INFO);
+            logger.info("Starting RankUp...");
+            logger.info("Properties file: " + propertiesFile);
 
             loadComponents();
             
             // Retrieve all abstracts
-            exceptionLogger.debug("Retrieving abstracts...", DebugLevel.INFO);
+            logger.info("Retrieving abstracts...");
             List<Abstract> allAbstracts =
                     abstractManager.retrieveAbstracts(
                     rankUpPropertiesList.get(0).abstractType,
@@ -352,16 +355,14 @@ public class Main_Standalone {
                     }
                 }
                 
-                exceptionLogger.debug("***************************************", 
-                        DebugLevel.INFO);
-                exceptionLogger.debug("RankUp Properties (" + rankUpPropertiesCount +
+                logger.info("***************************************");
+                logger.info("RankUp Properties (" + rankUpPropertiesCount +
                         "/" + rankUpPropertiesList.size() + "): " + 
                         rankUpProperties.propertiesFileName + "\n" +
-                        rankUpProperties.toString(),
-                        DebugLevel.INFO);
-                exceptionLogger.debug("", DebugLevel.INFO);
+                        rankUpProperties.toString());
+                logger.info("");
 
-                rankUp = new RankUp(exceptionLogger, 
+                rankUp = new RankUp(
                         //textRank,
                         abstractManager, 
                         posTagger, 
@@ -383,10 +384,9 @@ public class Main_Standalone {
                         "can be used in solving all the considered types of systems and systems of mixed types.";
                 Abstract abs = new Abstract(0, text, Type.TESTING, lemmatizer);
 
-                exceptionLogger.debug("Properties File: " + rankUpPropertiesCount + "/" +
-                        rankUpPropertiesList.size(), DebugLevel.INFO);
-                exceptionLogger.debug("Text: " + abs.getOriginalText() + "\n", 
-                        DebugLevel.INFO);
+                logger.info("Properties File: " + rankUpPropertiesCount + "/" +
+                        rankUpPropertiesList.size());
+                logger.info("Text: " + abs.getOriginalText() + "\n");
 
                 // Determine keyword extraction method
                 GraphBasedKeywordExtractor keywordExtractor;
@@ -399,23 +399,21 @@ public class Main_Standalone {
                         textRank = abs.getTextRank();
                     }
                     else {
-                        textRank = new TextRank(exceptionLogger, stopwords, languageModel);
+                        textRank = new TextRank(stopwords, languageModel);
                         abs.setTextRank(textRank);
                     }
                      
                     keywordExtractor = new GraphBasedKeywordExtractor(
-                            exceptionLogger, 
                             rankUpProperties,
                             textRank);
                 }
                 else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
                     keywordExtractor = new GraphBasedKeywordExtractor(
-                            exceptionLogger,
                             rankUpProperties,
                             rake);
                 }
                 else {
-                    exceptionLogger.debug("Wrong Keyword Extraction Method", DebugLevel.ERROR);
+                    logger.error("Wrong Keyword Extraction Method");
                     return;
                 }
 
@@ -428,8 +426,8 @@ public class Main_Standalone {
                     originalKeyphrases = rankUp.getOriginalKeyphraseSet();
                 }
                 catch (Exception exception) {
-                    exceptionLogger.debug("Exception in runRankUp: " + 
-                            exception.getMessage(), DebugLevel.ERROR);
+                    logger.error("Exception in runRankUp: " + 
+                            exception.getMessage());
                     exception.printStackTrace();
                     continue;
                 }
@@ -461,28 +459,8 @@ public class Main_Standalone {
 
                 // Print and insert TextRank KeyPhrases into database
                 if (rankUpPropertiesProcessedCount < 1 && GET_ORIGINAL_KEYPHRASES) {
-                    Main.printKeyPhrases(originalKeyphrases, 
-                            rankUpProperties.keywordExtractionMethod.toString(), 
-                            false);
-                }
-
-                // Print and insert RankUp KeyPhrases into database
-                if (GET_RANKUP_KEYPHRASES) {
-                    Main.printKeyPhrases(rankUpKeyphrases, "RankUp", false);
-                }
-
-                // Print the real rankUpKeyphrases
-                abstractManager.printRealKeywords(abs);
-
-                // Call results
-                if (PRINT_RESULTS) {
-                    PrecisionAnalyzer.results(
-                            abs,
-                            tfidfKeyphrases,
-                            originalKeyphrases,
-                            rankUpKeyphrases, 
-                            PARTIAL_MATCHING, 
-                            exceptionLogger, dataLogger, abstractManager, lemmatizer);
+                    printKeyPhrases(originalKeyphrases, 
+                            rankUpProperties.keywordExtractionMethod.toString());
                 }
 
                 // RankUp correctness for this abstract
@@ -491,41 +469,36 @@ public class Main_Standalone {
                 Double textRankNodeScoreCorrectness = 
                         rankUp.getKeyPhraseGraph().getTextRankNodeScoreCorrectness();
 
-                exceptionLogger.debug("", DebugLevel.DEBUG);
-                exceptionLogger.debug("Keyphrase final TextRank score correctness (this abstract): " + 
+                logger.debug("");
+                logger.debug("Keyphrase final TextRank score correctness (this abstract): " + 
                         (keyphraseFinalTextRankScoreCorrectness != null ?
                                 MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2) :
-                                ""), DebugLevel.DEBUG);
-                exceptionLogger.debug("TextRank node score correctness (this abstract): " + 
+                                ""));
+                logger.debug("TextRank node score correctness (this abstract): " + 
                         (textRankNodeScoreCorrectness != null ?
                                 MathUtils.round(textRankNodeScoreCorrectness, 2) :
-                                ""), DebugLevel.DEBUG);
+                                ""));
 
                 // Insert debug information into database
-                exceptionLogger.debug("Iterations: " + rankUp.getRankUpIterations(), 
-                        DebugLevel.DETAIL);
+                logger.trace("Iterations: " + rankUp.getRankUpIterations());
 
-                exceptionLogger.debug("", DebugLevel.INFO);
-                exceptionLogger.debug("RankUp completed for this text!", 
-                        DebugLevel.INFO);
-                exceptionLogger.debug("", DebugLevel.INFO);
+                logger.info("");
+                logger.info("RankUp completed for this text!");
+                logger.info("");
             }
         }
         catch (NumberFormatException nfe) {
-            exceptionLogger.debug("Sample percentage must be decimal number "
-                        + "between 0 and 1 (e.g. 0.25)!", DebugLevel.ERROR);
+            logger.error("Sample percentage must be decimal number "
+                        + "between 0 and 1 (e.g. 0.25)!");
         }
         catch (FileNotFoundException fnfe) {
-            exceptionLogger.debug("Properties file not found! " + fnfe.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("Properties file not found! " + fnfe.getMessage());
         }
         catch (IOException ioe) {
-            exceptionLogger.debug("IO Exception! " + ioe.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("IO Exception! " + ioe.getMessage());
         }
         catch (Exception e) {
-            exceptionLogger.debug("Exception in RankUp Main: " + e.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("Exception in RankUp Main: " + e.getMessage());
             e.printStackTrace();
         }
     }

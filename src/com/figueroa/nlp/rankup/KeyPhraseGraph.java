@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 import org.apache.commons.math.util.MathUtils;
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
 import com.figueroa.nlp.rake.RakeNode;
 import com.figueroa.nlp.rake.RakeNode.RakeNodeType;
 import com.figueroa.nlp.textrank.KeyWord;
 import com.figueroa.nlp.textrank.NGram;
 import com.figueroa.nlp.textrank.TextRankNode;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
+import com.figueroa.util.AbstractManager;
 import com.figueroa.util.MiscUtils;
 import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.Node;
@@ -31,7 +32,8 @@ import com.figueroa.nlp.Node;
  */
 public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
 
-    private final ExceptionLogger logger;
+	private static final long serialVersionUID = 1L;
+	private static final Logger logger = Logger.getLogger(AbstractManager.class);
     private final List<KeyPhrase> keyphrases;
 
     // Solution Expector
@@ -76,14 +78,12 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
     }
 
     public KeyPhraseGraph(
-            ExceptionLogger logger, 
             List<KeyPhrase> keyphrases,
             SetAssignmentApproach setAssignmentApproach,
             double featureLowerBound, 
             double featureUpperBound,
             Feature feature) {
 
-        this.logger = logger;
         this.keyphrases = keyphrases;
         
         this.feature = feature;
@@ -483,28 +483,24 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
     }
 
     public void printStatistics() {
-        logger.debug("**** STATISTICS ****", DebugLevel.DEBUG);
-        logger.debug("Score Mean: " + MathUtils.round(getOriginalScoreMean(), 2),
-                DebugLevel.DEBUG);
+        logger.debug("**** STATISTICS ****");
+        logger.debug("Score Mean: " + MathUtils.round(getOriginalScoreMean(), 2));
         logger.debug("Score Standard Deviation: " + 
-                MathUtils.round(getOriginalScoreStandardDeviation(), 2), DebugLevel.DEBUG);
+                MathUtils.round(getOriginalScoreStandardDeviation(), 2));
         logger.debug(feature + " Mean: "
-                + MathUtils.round(getFeatureMean(), 2),
-                DebugLevel.DEBUG);
+                + MathUtils.round(getFeatureMean(), 2));
         logger.debug(feature + " Variance: "
-                + MathUtils.round(getFeatureVariance(), 2),
-                DebugLevel.DEBUG);
+                + MathUtils.round(getFeatureVariance(), 2));
         logger.debug(feature + " Standard Deviation: "
-                + MathUtils.round(getFeatureStandardDeviation(), 2),
-                DebugLevel.DEBUG);
-        logger.debug("", DebugLevel.DEBUG);
+                + MathUtils.round(getFeatureStandardDeviation(), 2));
+        logger.debug("");
     }
 
     /*
     Keyphrase		& TFIDF 	& RAKE score 	& Exp. score	& Direction	\\
     considered		& 0.04		& 1.0		& -		& -  		\\
     */
-    public void printFeatureSetLatex(SetLevel setLevel, DebugLevel debugLevel) {
+    public void printFeatureSetLatex(SetLevel setLevel) {
         logger.debug(setLevel + " " + feature +
                 " (" +
                 "MIN " + feature + ": " +
@@ -519,8 +515,7 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                 MathUtils.round(getFeatureSetMaxTextRankScore(setLevel), 2) +
                 ", MEAN S: " +
                 MathUtils.round(getFeatureSetMeanTextRankScore(setLevel), 2) +
-                ")",
-                debugLevel);
+                ")");
         for (KeyPhrase keyphrase : getFeatureSet(setLevel)) {
             logger.debug(
                     keyphrase.text + 
@@ -532,13 +527,12 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                     MiscUtils.convertDoubleToFixedCharacterString(keyphrase.getExpectedScore(), 2) +
                     "\t& " +
                     keyphrase.getExpectedScoreDirection() +
-                    "\\\\", 
-                    debugLevel);
+                    "\\\\");
         }
-        logger.debug("", debugLevel);
+        logger.debug("");
     }
     
-    public void printFeatureSet(SetLevel setLevel, DebugLevel debugLevel) {
+    public void printFeatureSet(SetLevel setLevel) {
         logger.debug(setLevel + " " + feature +
                 " (" +
                 "MIN " + feature + ": " +
@@ -553,13 +547,11 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                 MathUtils.round(getFeatureSetMaxTextRankScore(setLevel), 2) +
                 ", MEAN S: " +
                 MathUtils.round(getFeatureSetMeanTextRankScore(setLevel), 2) +
-                ")",
-                debugLevel);
+                ")");
         for (KeyPhrase keyphrase : getFeatureSet(setLevel)) {
-            logger.debug(keyphrase.toString() + "\t" + keyphrase.getFeatures().toString(), 
-                    debugLevel);
+            logger.debug(keyphrase.toString() + "\t" + keyphrase.getFeatures().toString());
         }
-        logger.debug("", debugLevel);
+        logger.debug("");
     }
     
     /**
@@ -654,8 +646,8 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
     }
     
     public void printGraph(boolean onlyPrintNGramEdges) {
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("*** Keyphrase Graph ***", DebugLevel.DETAIL);
+        logger.trace("");
+        logger.trace("*** Keyphrase Graph ***");
         for (KeyPhrase keyphrase : keyphrases) {
             
 //            // For debugging only
@@ -667,8 +659,8 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
             Node node = keyphrase.getNode();
             HashMap<Node, Double> edges = node.getEdges();
 
-            logger.debug(keyphraseString, DebugLevel.DETAIL);
-            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            logger.trace(keyphraseString);
+            logger.trace("\tEdges: ");
             for (Node en : edges.keySet()) {
                 if (en instanceof TextRankNode) {
                     TextRankNode edgeNode = (TextRankNode) en;
@@ -685,7 +677,7 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                         String edgeInformation = "\t\t" + edgeText + 
                                 " (" + edgeNode.value.getClass().getSimpleName() + ") - " + 
                                 MathUtils.round(edges.get(edgeNode), 2);
-                        logger.debug(edgeInformation , DebugLevel.DETAIL);
+                        logger.trace(edgeInformation);
                     }
                 }
                 else if (en instanceof RakeNode) {
@@ -694,7 +686,7 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                     String edgeInformation = "\t\t" + edgeText + 
                             " (" + edgeNode.getClass().getSimpleName() + ") - " + 
                             MathUtils.round(edges.get(edgeNode), 2);
-                    logger.debug(edgeInformation , DebugLevel.DETAIL);
+                    logger.trace(edgeInformation);
                 }
             }
         }
@@ -702,13 +694,13 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
                 getKeyphraseFinalTextRankScoreCorrectness();
         Double keyphraseScoreCorrectness = getKeyphraseScoreCorrectness();
         Double textRankNodeScoreCorrectness = getTextRankNodeScoreCorrectness();
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("Keyphrase final TextRank score correctness: " + 
-                MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2), DebugLevel.DETAIL);
-        logger.debug("Keyphrase score correctness: " + 
-                MathUtils.round(keyphraseScoreCorrectness, 2), DebugLevel.DETAIL);
-        logger.debug("TextRank node score correctness: " + 
-                MathUtils.round(textRankNodeScoreCorrectness, 2), DebugLevel.DETAIL);
-        logger.debug("", DebugLevel.DETAIL);
+        logger.trace("");
+        logger.trace("Keyphrase final TextRank score correctness: " + 
+                MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2));
+        logger.trace("Keyphrase score correctness: " + 
+                MathUtils.round(keyphraseScoreCorrectness, 2));
+        logger.trace("TextRank node score correctness: " + 
+                MathUtils.round(textRankNodeScoreCorrectness, 2));
+        logger.trace("");
     }
 }

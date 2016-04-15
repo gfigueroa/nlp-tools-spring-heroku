@@ -38,13 +38,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeMap;
+
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 import org.apache.commons.math.util.MathUtils;
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.KeyPhrase;
-import com.figueroa.nlp.rankup.KeyPhraseGraph;
 import com.figueroa.nlp.Node;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
+import com.figueroa.nlp.rankup.KeyPhraseGraph;
 
 /**
  * An abstraction for handling the graph as a data object.
@@ -53,6 +54,10 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  */
 public class TextRankGraph extends TreeMap<String, TextRankNode> {
 
+	private static final long serialVersionUID = 1L;
+
+	private static final Logger logger = Logger.getLogger(TextRankGraph.class);
+	
     /**
      * Public definitions.
      */
@@ -78,7 +83,7 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
      * the standard error converges below a given threshold.
      * @param logger
      */
-    public void runTextRank(ExceptionLogger logger) {
+    public void runTextRank() {
         final int max_iterations = this.size();
         node_list = new TextRankNode[this.size()];
 
@@ -92,11 +97,11 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
 
         // iterate, then sort and mark the top results
 
-        iterateGraph(max_iterations, true, logger);
+        iterateGraph(max_iterations, true);
     }
 
     // For outside use
-    public void runTextRank(boolean debug, ExceptionLogger logger) {
+    public void runTextRank(boolean debug) {
         final int max_iterations = this.size();
         node_list = new TextRankNode[this.size()];
 
@@ -110,7 +115,7 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
 
         // iterate, then sort and mark the top results
 
-        iterateGraph(max_iterations, debug, logger);
+        iterateGraph(max_iterations, debug);
     }
     
     /**
@@ -121,8 +126,7 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
      */
     protected void iterateGraph(
             final int max_iterations, 
-            boolean debug,
-            ExceptionLogger logger
+            boolean debug
             ) {
 
         final double[] rank_list = new double[node_list.length];
@@ -177,8 +181,7 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
                     dist_stats.getStandardDeviation() / Math.sqrt((double) dist_stats.getN());
 
             if (debug) {
-                logger.debug("iteration: " + k + " error: " + standard_error,
-                        DebugLevel.DETAIL);
+                logger.trace("iteration: " + k + " error: " + standard_error);
             }
 
             // swap in new rank values
@@ -246,9 +249,9 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
      * @param keyphraseGraph
      * @param logger 
      */
-    public void printGraph(KeyPhraseGraph keyphraseGraph, ExceptionLogger logger) {
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("*** TextRank Graph ***", DebugLevel.DETAIL);
+    public void printGraph(KeyPhraseGraph keyphraseGraph) {
+        logger.trace("");
+        logger.trace("*** TextRank Graph ***");
         for (TextRankNode node : this.values()) {
             
             // Skip SynsetLink nodes
@@ -262,8 +265,8 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
             HashMap<Node, Double> previousEdges = node.getPreviousEdges();
             HashMap<Node, Double> edges = node.getEdges();
 
-            logger.debug(nodeString, DebugLevel.DETAIL);
-            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            logger.trace(nodeString);
+            logger.trace("\tEdges: ");
             for (Node edgeNode : edges.keySet()) {
                 KeyPhrase edgeKeyphrase = keyphraseGraph.get(edgeNode.key);
                 // Skip SynsetLink nodes
@@ -280,41 +283,41 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
                         " - w: " + MathUtils.round(edgeWeight, 2);
                 edgeInformation += " (P: " + MathUtils.round(previousEdgeWeight, 2) +
                         ")";
-                logger.debug(edgeInformation , DebugLevel.DETAIL);
+                logger.trace(edgeInformation );
             }
         }
         
         Double keyphraseFinalTextRankScoreCorrectness = 
                 keyphraseGraph.getKeyphraseFinalTextRankScoreCorrectness();
         Double textRankNodeScoreCorrectness = keyphraseGraph.getTextRankNodeScoreCorrectness();
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("Keyphrase final TextRank score correctness: " + 
+        logger.trace("");
+        logger.trace("Keyphrase final TextRank score correctness: " + 
                 (keyphraseFinalTextRankScoreCorrectness != null ?
                         MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2) :
-                        ""), DebugLevel.DETAIL);
-        logger.debug("TextRank node score correctness: " + 
+                        ""));
+        logger.trace("TextRank node score correctness: " + 
                 (textRankNodeScoreCorrectness != null ?
                         MathUtils.round(textRankNodeScoreCorrectness, 2) :
-                        ""), DebugLevel.DETAIL);
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("**********************", DebugLevel.DETAIL);
+                        ""));
+        logger.trace("");
+        logger.debug("**********************");
     }
     
     /**
      * Print graph in text mode
      * @param logger 
      */
-    public void printGraph(ExceptionLogger logger) {
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("*** TextRank Graph ***", DebugLevel.DETAIL);
+    public void printGraph() {
+        logger.trace("");
+        logger.trace("*** TextRank Graph ***");
         for (Node node : this.values()) {
             String nodeString = node.toString();
             
             HashMap<Node, Double> previousEdges = node.getPreviousEdges();
             HashMap<Node, Double> edges = node.getEdges();
 
-            logger.debug(nodeString, DebugLevel.DETAIL);
-            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            logger.trace(nodeString);
+            logger.trace("\tEdges: ");
             for (Node edgeNode : edges.keySet()) {
                 
                 String edgeText = edgeNode.toString();
@@ -326,10 +329,10 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
                         " - w: " + MathUtils.round(edgeWeight, 2);
                 edgeInformation += " (P: " + MathUtils.round(previousEdgeWeight, 2) +
                         ")";
-                logger.debug(edgeInformation , DebugLevel.DETAIL);
+                logger.trace(edgeInformation);
             }
         }
-        logger.debug("**********************", DebugLevel.DETAIL);
+        logger.trace("**********************");
     }
     
     /**

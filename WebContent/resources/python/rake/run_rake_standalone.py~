@@ -1,0 +1,18 @@
+# coding=utf-8
+import rake
+import logging
+import collections
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+def run_rake_standalone(stop_word_list, sentence):
+    extractor = rake.Rake(stop_word_list)  # It uses SmartStoplist, you can choose FoxStopList instead
+    keywords = extractor.run(sentence)
+    return keywords
+
+
+if __name__ == "__main__":
+    text = "Hello world, this is a test."
+    keywords = run_rake_standalone("SmartStoplist.txt", text)
+    print keywords

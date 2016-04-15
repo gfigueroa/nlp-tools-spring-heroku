@@ -3,7 +3,9 @@ package com.figueroa.nlp.rake;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.commons.math.util.MathUtils;
+import org.apache.log4j.Logger;
 import org.python.core.Py;
 import org.python.core.PyDictionary;
 import org.python.core.PyList;
@@ -11,11 +13,10 @@ import org.python.core.PyString;
 import org.python.core.PySystemState;
 import org.python.core.PyTuple;
 import org.python.util.PythonInterpreter;
+
 import com.figueroa.nlp.Node;
 import com.figueroa.nlp.rake.RakeNode.RakeNodeType;
 import com.figueroa.util.Abstract;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  * A wrapper class for the RAKE implementation in Python
@@ -28,18 +29,18 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  */
 public class Rake {
     
+	private static final Logger logger = Logger.getLogger(Rake.class);
+	
     public final static String JYTHON_ROOT_PATH = "/home/gfigueroa/jython2.5.3/Lib";
     public final static String RAKE_DIR = "./python/rake";
     public final static String RAKE_STOPWORDS_PATH = "./python/rake/SmartStoplist.txt";
     
     public final PythonInterpreter pythonInterpreter;
-    public final ExceptionLogger logger;
     public HashMap<String, RakeNode> rakeFullGraph = null;
     public HashMap<String, Double> currentKeyphrases = null;
     public HashMap<String, Double> currentWords = null;
     
-    public Rake(final ExceptionLogger logger) {
-        this.logger = logger;
+    public Rake() {
         pythonInterpreter = initPython();
         initRake();
     }
@@ -49,7 +50,7 @@ public class Rake {
      * @return an instance of the PythonInterpreter already initialized
      */
     private PythonInterpreter initPython() {
-        logger.debug("Initializing Jython...", ExceptionLogger.DebugLevel.DEBUG);
+        logger.debug("Initializing Jython...");
         PythonInterpreter interp = new PythonInterpreter(null, new PySystemState());
         PySystemState sys = Py.getSystemState();
         sys.path.append(new PyString(JYTHON_ROOT_PATH));
@@ -303,7 +304,7 @@ public class Rake {
      * @throws java.lang.Exception
      */
     public HashMap<String, Double> runRake(String text) throws Exception {
-        logger.debug("Extracting RAKE keywords...", ExceptionLogger.DebugLevel.DEBUG);
+        logger.debug("Extracting RAKE keywords...");
         // Clean new line
         text = text.replaceAll("\n", "\\n");
         
@@ -312,8 +313,7 @@ public class Rake {
             pythonInterpreter.exec("word_scores = extractor.word_scores");
             }
         catch (Exception e) {
-            logger.debug("Error in runRake(): " + e.getMessage(), 
-                    ExceptionLogger.DebugLevel.DETAIL);
+            logger.trace("Error in runRake(): " + e.getMessage());
             throw e;
         }
         
@@ -338,7 +338,7 @@ public class Rake {
      * @throws java.lang.Exception
      */
     public HashMap<String, Double> rerunRake() throws Exception {
-        logger.debug("Rerunning RAKE...", ExceptionLogger.DebugLevel.DEBUG);
+        logger.debug("Rerunning RAKE...");
         
         // First, update the co-occurrence graph in Python
         updateRakePythonGraph();
@@ -348,8 +348,7 @@ public class Rake {
             pythonInterpreter.exec("word_scores = extractor.word_scores");
         }
         catch (Exception e) {
-            logger.debug("Error in rerunRake(): " + e.getMessage(), 
-                    ExceptionLogger.DebugLevel.DETAIL);
+            logger.trace("Error in rerunRake(): " + e.getMessage());
             throw e;
         }
         
@@ -372,9 +371,9 @@ public class Rake {
      * Print graph in text mode
      * @param logger 
      */
-    public void printRakeGraph(ExceptionLogger logger) {
-        logger.debug("", DebugLevel.DETAIL);
-        logger.debug("*** TextRank Graph ***", DebugLevel.DETAIL);
+    public void printRakeGraph() {
+        logger.trace("");
+        logger.trace("*** TextRank Graph ***");
         for (Node node : this.rakeFullGraph.values()) {
             
 //            // For debugging only
@@ -387,8 +386,8 @@ public class Rake {
             HashMap<Node, Double> previousEdges = node.getPreviousEdges();
             HashMap<Node, Double> edges = node.getEdges();
 
-            logger.debug(nodeString, DebugLevel.DETAIL);
-            logger.debug("\tEdges: ", DebugLevel.DETAIL);
+            logger.trace(nodeString);
+            logger.trace("\tEdges: ");
             for (Node edgeNode : edges.keySet()) {
                 
                 String edgeText = edgeNode.toString();
@@ -400,10 +399,10 @@ public class Rake {
                         " - w: " + MathUtils.round(edgeWeight, 2);
                 edgeInformation += " (P: " + MathUtils.round(previousEdgeWeight, 2) +
                         ")";
-                logger.debug(edgeInformation , DebugLevel.DETAIL);
+                logger.trace(edgeInformation);
             }
         }
-        logger.debug("**********************", DebugLevel.DETAIL);
+        logger.trace("**********************");
     }
     
 }

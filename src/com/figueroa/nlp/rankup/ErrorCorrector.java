@@ -1,11 +1,12 @@
 package com.figueroa.nlp.rankup;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
-import com.figueroa.util.ExceptionLogger;
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.Node;
 
@@ -23,11 +24,7 @@ import com.figueroa.nlp.Node;
  */
 public abstract class ErrorCorrector {
 
-    protected static final String loggerDir =
-            "." + File.separator + "logs" + File.separator + "exception_log" +
-            System.currentTimeMillis() + ".log";
-    protected static final ExceptionLogger logger =
-            new ExceptionLogger(loggerDir, Main.DEBUG_LEVEL);
+	protected static final Logger logger = Logger.getLogger(ErrorCorrector.class);
 
     // Property
     public static enum ConvergenceScheme {
@@ -261,23 +258,20 @@ public abstract class ErrorCorrector {
             // First check threshold
             if (useDifferentialConvergence) {
                 if (Math.abs(currentStandardError - previousStandardError) < standardErrorThreshold) {
-                    logger.debug("Break iteration (Standard error - Previous error < threshold) ", 
-                            ExceptionLogger.DebugLevel.DEBUG);
+                    logger.debug("Break iteration (Standard error - Previous error < threshold) ");
                     return true;
                 }
             }
             else {
                 if (currentStandardError <= standardErrorThreshold) {
-                    logger.debug("Break iteration (Standard error <= Standard error threshold) ", 
-                            ExceptionLogger.DebugLevel.DEBUG);
+                    logger.debug("Break iteration (Standard error <= Standard error threshold) ");
                     return true;
                 }
             }
             
             // Check if currentStandardError is a number
             if (Double.isNaN(currentStandardError)) {
-                logger.debug("Break iteration (Standard error is NaN) ", 
-                        ExceptionLogger.DebugLevel.DEBUG);
+                logger.debug("Break iteration (Standard error is NaN) ");
                 // Always revert graphs
                 revertGraphs(keyPhraseGraph, graphNodes);
                 return true;
@@ -287,8 +281,7 @@ public abstract class ErrorCorrector {
             switch (convergenceRule) {
                 case NO_INCREASE:
                     if (currentStandardError >= previousStandardError) {
-                        logger.debug("Break iteration (Current standard error > Previous standard error) ", 
-                                ExceptionLogger.DebugLevel.DEBUG);
+                        logger.debug("Break iteration (Current standard error > Previous standard error) ");
                         
                         // Revert the graphs
                         if (revertGraphs) {
@@ -298,8 +291,7 @@ public abstract class ErrorCorrector {
                     }
                 case NO_INCREASE_2X:
                     if (currentStandardError >= (previousStandardError * 2)) {
-                        logger.debug("Break iteration (Current standard error >= Previous standard error x 2) ", 
-                                ExceptionLogger.DebugLevel.DEBUG);
+                        logger.debug("Break iteration (Current standard error >= Previous standard error x 2) ");
                         
                         // Revert the graphs
                         if (revertGraphs) {
@@ -321,7 +313,7 @@ public abstract class ErrorCorrector {
             KeyPhraseGraph keyPhraseGraph, 
             Collection<? extends Node> graphNodes) {
         
-        logger.debug("Reverting graphs...", ExceptionLogger.DebugLevel.DEBUG);
+        logger.debug("Reverting graphs...");
         for (Node node : graphNodes) {
             KeyPhrase keyphrase = keyPhraseGraph.get(node.key);
             if (keyphrase != null) {

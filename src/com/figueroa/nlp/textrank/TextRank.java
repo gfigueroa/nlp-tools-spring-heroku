@@ -31,19 +31,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.figueroa.nlp.textrank;
 
-import java.io.*;
-
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-import net.didion.jwnl.data.POS;
+import org.apache.log4j.Logger;
 
 import com.figueroa.nlp.Stopwords;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
+
+import net.didion.jwnl.data.POS;
 
 /**
  * Java implementation of the TextRank algorithm by Rada Mihalcea, et al.
@@ -52,9 +52,8 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  * @author paco@sharethis.com
  */
 public class TextRank {
-
-    // Logger
-    private final ExceptionLogger logger;
+	
+	private static final Logger logger = Logger.getLogger(TextRank.class);
 
     /**
      * Public definitions.
@@ -82,10 +81,8 @@ public class TextRank {
     private final Stopwords stopwords;
 
     // Public constructor (for use in other classes)
-    public TextRank(ExceptionLogger logger, Stopwords stopwords, LanguageModel lang) 
+    public TextRank(Stopwords stopwords, LanguageModel lang) 
             throws Exception {
-
-        this.logger = logger;
 
         // filter out overly large files
 
@@ -183,7 +180,7 @@ public class TextRank {
 
         final int max_results = (int) Math.round((double) graph.size() * TextRankGraph.KEYWORD_REDUCTION_FACTOR); // ORIGINAL
 
-        graph.runTextRank(logger);
+        graph.runTextRank();
         graph.sortResults(max_results);
 
         ngram_subgraph = NGram.collectNGrams(lang, s_list, graph.getRankThreshold()); // ORIGINAL
@@ -191,8 +188,8 @@ public class TextRank {
 
         markTime("basic_textrank");
 
-        logger.debug("TEXT_BYTES:\t" + text.length(), DebugLevel.DETAIL);
-        logger.debug("GRAPH_SIZE:\t" + graph.size(), DebugLevel.DETAIL);
+        logger.trace("TEXT_BYTES:\t" + text.length());
+        logger.trace("GRAPH_SIZE:\t" + graph.size());
 
 //        logger.info("INITIAL GRAPH");
 //        // Print TextRankGraph
@@ -266,8 +263,8 @@ public class TextRank {
 
         initTime();
 
-        logger.debug("RERUN TEXTRANK", DebugLevel.DETAIL);
-        graph.runTextRank(logger);
+        logger.trace("RERUN TEXTRANK");
+        graph.runTextRank();
         //graph.sortResults(graph.size() / 2);
 
         markTime("ngram_textrank");
@@ -290,62 +287,32 @@ public class TextRank {
         // Collect stats for metrics
         final int ngram_max_count = NGram.calcStats(ngram_subgraph);
         SynsetLink.calcStats(synset_subgraph);
-        logger.debug("ngram_max_count = " + ngram_max_count, DebugLevel.MORE_DETAIL);
-        logger.debug("\nngram_subgraph stats: " + ngram_subgraph.dist_stats.toString(), DebugLevel.MORE_DETAIL);
-        logger.debug("\nsynset_subgraph stats: " + synset_subgraph.dist_stats.toString(), DebugLevel.MORE_DETAIL);
 
         // Construct a metric space for overall ranking
         final double link_min = ngram_subgraph.dist_stats.getMin();
         final double link_coeff = ngram_subgraph.dist_stats.getMax() -
                 ngram_subgraph.dist_stats.getMin();
-        logger.debug("link_min = " + link_min, DebugLevel.MORE_DETAIL);
-        logger.debug("link_coeff = link_max - link_min = " + 
-                ngram_subgraph.dist_stats.getMax() + " - " + link_min + " = " +
-                link_coeff, DebugLevel.MORE_DETAIL);
 
         final double count_min = 1;
         final double count_coeff = (double) ngram_max_count - 1;
-        logger.debug("count_min = " + count_min, DebugLevel.MORE_DETAIL);
-        logger.debug("count_coeff = ngram_max_count - 1 = " + 
-                ngram_max_count + " - " + 1 + " = " +
-                count_coeff, DebugLevel.MORE_DETAIL);
 
         final double synset_min = synset_subgraph.dist_stats.getMin();
         final double synset_coeff = synset_subgraph.dist_stats.getMax() -
                 synset_subgraph.dist_stats.getMin();
-        logger.debug("synset_min = " + synset_min, DebugLevel.MORE_DETAIL);
-        logger.debug("synset_coeff = synset_max - synset_min = " + 
-                synset_subgraph.dist_stats.getMax() + " - " + synset_min + " = " +
-                synset_coeff, DebugLevel.MORE_DETAIL);
 
-        logger.debug("", DebugLevel.MORE_DETAIL);
-        logger.debug("*** NGrams: ***", DebugLevel.MORE_DETAIL);
         for (TextRankNode n : ngram_subgraph.values()) {
             final NGram gram = (NGram) n.value;
-            logger.debug("gram: " + n.toString(), DebugLevel.MORE_DETAIL);
             
             if (gram.length < TextRank.MAX_NGRAM_LENGTH) {
                 final double link_rank = (n.getRank() - link_min) / link_coeff;
                 final double count_rank = (gram.getCount() - count_min) / count_coeff;
-                final double synset_rank = n.maxNeighbor(synset_min, synset_coeff, logger);
-                logger.debug("link_rank = (n.getRank() - link_min) / link_coeff = " + 
-                        "(" + n.getRank() + " - " + link_min + ") / " + link_coeff + " = " +
-                        link_rank, DebugLevel.MORE_DETAIL);
-                logger.debug("count_rank = (gram.getCount() - count_min) / count_coeff = " + 
-                        "(" + gram.getCount() + " - " + count_min + ") / " + count_coeff + " = " +
-                        count_rank, DebugLevel.MORE_DETAIL);
-                logger.debug("synset_rank = n.maxNeighbor(synset_min, synset_coeff) = " +
-                        "n.maxNeighbor(" +  synset_min + ", " + synset_coeff + ") = " + synset_rank, DebugLevel.MORE_DETAIL);
+                final double synset_rank = n.maxNeighbor(synset_min, synset_coeff);
 
                 final MetricVector mv =
-                        new MetricVector(gram, link_rank, count_rank, synset_rank, logger);
+                        new MetricVector(gram, link_rank, count_rank, synset_rank);
                 metricSpace.put(gram, mv);
-                logger.debug("", DebugLevel.MORE_DETAIL);
             }
         }
-        
-        logger.debug("**************** End Calculate Metrics ****************", DebugLevel.MORE_DETAIL);
-        logger.debug("", DebugLevel.MORE_DETAIL);
 
         return metricSpace;
     }
@@ -367,7 +334,7 @@ public class TextRank {
     public void markTime(final String label) {
         elapsed_time = System.currentTimeMillis() - start_time;
 
-        logger.debug("ELAPSED_TIME:\t" + elapsed_time + "\t" + label, DebugLevel.DETAIL);
+        logger.trace("ELAPSED_TIME:\t" + elapsed_time + "\t" + label);
     }
 
     /**

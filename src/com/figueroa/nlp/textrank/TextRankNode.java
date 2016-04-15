@@ -36,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.math.util.MathUtils;
 import com.figueroa.nlp.Node;
-import com.figueroa.util.ExceptionLogger;
 import com.figueroa.util.MiscUtils;
 
 /**
@@ -97,9 +96,7 @@ public class TextRankNode extends Node {
      * @param logger
      * @return 
      */
-    public double maxNeighbor(final double min, final double coeff, 
-            ExceptionLogger logger) {
-        logger.debug("** maxNeighbor() ** ", ExceptionLogger.DebugLevel.MORE_DETAIL);
+    public double maxNeighbor(final double min, final double coeff) {
         
         double adjusted_rank = 0.0D;
 
@@ -114,7 +111,6 @@ public class TextRankNode extends Node {
         }
 
         if (edges.size() > 1) {
-            logger.debug("edges.size() > 1", ExceptionLogger.DebugLevel.MORE_DETAIL);
             // consider the immediately adjacent synsets
 
             double max_rank = 0.0D;
@@ -125,27 +121,19 @@ public class TextRankNode extends Node {
                     max_rank = Math.max(max_rank, node.rank);
                 }
             }
-            logger.debug("max_rank = " + max_rank, ExceptionLogger.DebugLevel.MORE_DETAIL);
 
             if (max_rank > 0.0D) {
                 // adjust it for scale [0.0, 1.0]
                 adjusted_rank = (max_rank - min) / coeff;
-                logger.debug("max_rank > 0.0D: ", ExceptionLogger.DebugLevel.MORE_DETAIL);
-                logger.debug("adjusted_rank = (max_rank - min) / coeff = " +
-                        "(" + max_rank + " - " + min + ") / " + coeff + " = " +
-                        adjusted_rank, 
-                        ExceptionLogger.DebugLevel.MORE_DETAIL);
             }
         }
         else {
-            logger.debug("edges.size() <= 1", ExceptionLogger.DebugLevel.MORE_DETAIL);
             // consider the synsets of the one component keyword
-
             for (Node n : edges.keySet()) {
                 TextRankNode node = (TextRankNode) n;
                 if (node.value instanceof KeyWord) {
                     // there will only be one
-                    adjusted_rank = node.maxNeighbor(min, coeff, logger);
+                    adjusted_rank = node.maxNeighbor(min, coeff);
                 }
             }
         }
@@ -154,8 +142,6 @@ public class TextRankNode extends Node {
             log_.debug(adjusted_rank);
         }
 
-        logger.debug("adjusted_rank = " + adjusted_rank, ExceptionLogger.DebugLevel.MORE_DETAIL);
-        logger.debug("******************* ", ExceptionLogger.DebugLevel.MORE_DETAIL);
         return adjusted_rank;
     }
 

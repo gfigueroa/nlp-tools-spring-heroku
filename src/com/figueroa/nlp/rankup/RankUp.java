@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
 import com.figueroa.nlp.POSTagger;
@@ -17,8 +20,6 @@ import com.figueroa.nlp.rake.RakeNode;
 import com.figueroa.nlp.rake.RakeNode.RakeNodeType;
 import com.figueroa.util.Abstract;
 import com.figueroa.util.AbstractManager;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  * RankUp is an unsupervised approach for keyphrase extraction
@@ -33,7 +34,7 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
 public class RankUp {
 
     // Logger and debugging
-    private final ExceptionLogger logger;
+	private static final Logger logger = Logger.getLogger(RankUp.class);
     private int errorCorrectorIterations;
 
     // MySQL AbstractManager and DatabaseManager
@@ -66,8 +67,7 @@ public class RankUp {
     private final Rake rake;
 
     // Constructor
-    public RankUp(ExceptionLogger logger,
-            //TextRank textRank, 
+    public RankUp(
             AbstractManager abstractManager,
             POSTagger posTagger, 
             Lemmatizer lemmatizer, 
@@ -81,7 +81,6 @@ public class RankUp {
             boolean useDifferentialConvergence)
             throws Exception {
 
-        this.logger = logger;
         //this.textRank = textRank;
         this.abstractManager = abstractManager;
         this.posTagger = posTagger;
@@ -113,7 +112,7 @@ public class RankUp {
             for (KeyPhrase keyPhrase : keyPhrases) {
                 PhraseFeatures.setPhraseFeatures(
                         keyPhrase, abs, trainingAbstracts, abstractManager, posTagger,
-                        lemmatizer, rakeKeyphrases, logger);
+                        lemmatizer, rakeKeyphrases);
             }
             
             abs.setPhraseFeatures();
@@ -177,8 +176,8 @@ public class RankUp {
         try {
             // 1. Run Keyword Extractor (TextRank, RAKE, etc.) 
             // (3.1 Construct Graph and 3.2 Ranking Nodes)
-            logger.debug("1. Extracting " + keywordExtractor.keywordExtractionMethod + 
-                    " keyphrases...", DebugLevel.INFO);
+            logger.info("1. Extracting " + keywordExtractor.keywordExtractionMethod + 
+                    " keyphrases...");
             List<KeyPhrase> originalKeyphraseListFull = keywordExtractor.extractKeyphrases(abs);
 
             // Get Keyphrases to use in ErrorDetector and ErrorCorrector
@@ -210,13 +209,12 @@ public class RankUp {
             originalKeyphraseList = realKeyphraseList;
             
             // 2. Set keyphrase features
-            logger.debug("2. Setting keyphrase features...", DebugLevel.INFO);
+            logger.info("2. Setting keyphrase features...");
             setKeyPhraseFeatures(feedbackKeyphraseList, abs, false);
             
             // 3. Assign keyphrase sets
-            logger.debug("3. Assigning keyphrase sets...", DebugLevel.INFO);
+            logger.info("3. Assigning keyphrase sets...");
             keyPhraseGraph = new KeyPhraseGraph(
-                    logger, 
                     feedbackKeyphraseList,
                     rankUpProperties.setAssignmentApproach,
                     rankUpProperties.featureLowerBound,
@@ -225,7 +223,7 @@ public class RankUp {
                             rankUpProperties.errorDetectingApproach));
 
             // 4. Assign expected scores (3.3 Detect Errors)
-            logger.debug("4. Assigning expected scores...", DebugLevel.INFO);
+            logger.info("4. Assigning expected scores...");
             ErrorDetector.assignExpectedScores(keyPhraseGraph,
                     rankUpProperties.expectedScoreValue, MINMAX_MID_BUG_FIX);
 
@@ -233,13 +231,13 @@ public class RankUp {
             PhraseFeatures.Feature feature = 
                     PhraseFeatures.getFeatureFromErrorDetectingApproach(
                             rankUpProperties.errorDetectingApproach);
-            logger.debug("**** Initial " + feature + " Sets ****", DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.LOW, DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.MID, DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.HIGH, DebugLevel.DEBUG);
+            logger.debug("**** Initial " + feature + " Sets ****");
+            keyPhraseGraph.printFeatureSet(SetLevel.LOW);
+            keyPhraseGraph.printFeatureSet(SetLevel.MID);
+            keyPhraseGraph.printFeatureSet(SetLevel.HIGH);
             
             // 5. Perform error Feedback (3.4 Error Feedback)
-            logger.debug("5. Performing error feedback...", DebugLevel.INFO);
+            logger.info("5. Performing error feedback...");
             if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
                 errorCorrectorIterations = TextRankErrorCorrector.performErrorFeedback(
                         abs,
@@ -280,14 +278,14 @@ public class RankUp {
                 rankUpKeyphrases = getSortedKeyphrases(realKeyphraseList);
             }
             
-            logger.debug("**** Final " + feature + " Sets ****", DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.LOW, DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.MID, DebugLevel.DEBUG);
-            keyPhraseGraph.printFeatureSet(SetLevel.HIGH, DebugLevel.DEBUG);
+            logger.debug("**** Final " + feature + " Sets ****");
+            keyPhraseGraph.printFeatureSet(SetLevel.LOW);
+            keyPhraseGraph.printFeatureSet(SetLevel.MID);
+            keyPhraseGraph.printFeatureSet(SetLevel.HIGH);
 
             // 6. Apply postprocessing 
             if (rankUpProperties.postprocess) {
-                logger.debug("6. Applying Postprocessing...", DebugLevel.INFO);
+                logger.info("6. Applying Postprocessing...");
                 rankUpKeyphrases =
                         postProcessKeyphrases(rankUpKeyphrases);  // Full post-processing
             }
@@ -295,8 +293,7 @@ public class RankUp {
             return rankUpKeyphrases;
         }
         catch (Exception e) {
-            logger.debug("Exception in runHybridRank: " + e.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("Exception in runHybridRank: " + e.getMessage());
             e.printStackTrace();
             return null;
         }

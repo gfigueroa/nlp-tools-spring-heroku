@@ -3,8 +3,10 @@ package com.figueroa.util;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.rankup.RankUpProperties;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  *
@@ -18,12 +20,12 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  */
 public class AbstractManager {
 
+	private static final Logger logger = Logger.getLogger(AbstractManager.class);
+	
     public DatabaseManager databaseManager;
-    private ExceptionLogger logger;
 
-    public AbstractManager(DatabaseManager dbm, ExceptionLogger log) {
+    public AbstractManager(DatabaseManager dbm) {
         databaseManager = dbm;
-        logger = log;
     }
 
     /**
@@ -62,8 +64,7 @@ public class AbstractManager {
                 ;
                 break;
             default:
-                logger.debug("Error in retrieveAbstractIds: incorrect abstractType!",
-                        DebugLevel.ERROR);
+                logger.error("Error in retrieveAbstractIds: incorrect abstractType!");
                 return null;
         }
 
@@ -85,8 +86,7 @@ public class AbstractManager {
             return abstractIds;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractIds: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractIds: " + ex.getMessage());
             return null;
         }
     }
@@ -127,8 +127,7 @@ public class AbstractManager {
                 ;
                 break;
             default:
-                logger.debug("Error in retrieveAbstractTexts: incorrect abstractType!",
-                        DebugLevel.ERROR);
+                logger.error("Error in retrieveAbstractTexts: incorrect abstractType!");
                 return null;
         }
 
@@ -150,8 +149,7 @@ public class AbstractManager {
             return abstractTexts;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractTexts: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractTexts: " + ex.getMessage());
             return null;
         }
     }
@@ -191,8 +189,7 @@ public class AbstractManager {
                         " WHERE Abstract_Type = 'Validation' ";
                 break;
             default:
-                logger.debug("Error in retrieveAbstracts: incorrect abstractType!",
-                        DebugLevel.ERROR);
+                logger.error("Error in retrieveAbstracts: incorrect abstractType!");
                 return null;
         }
 
@@ -221,13 +218,11 @@ public class AbstractManager {
             return abstracts;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractTexts: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractTexts: " + ex.getMessage());
             return null;
         }
         catch (Exception ex) {
-            logger.debug("Exception in retrieveAbstractTexts: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("Exception in retrieveAbstractTexts: " + ex.getMessage());
             return null;
         }
     }
@@ -255,13 +250,11 @@ public class AbstractManager {
             return abs;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractText: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractText: " + ex.getMessage());
             return null;
         } 
         catch (Exception ex) {
-            logger.debug("Exception in retrieveAbstractText: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("Exception in retrieveAbstractText: " + ex.getMessage());
             return null;
         }
     }
@@ -282,8 +275,7 @@ public class AbstractManager {
             return abstractText;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractText: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractText: " + ex.getMessage());
             return null;
         }
     }
@@ -311,8 +303,7 @@ public class AbstractManager {
             }
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractText: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractText: " + ex.getMessage());
             return 0;
         }
     }
@@ -333,8 +324,7 @@ public class AbstractManager {
             return abstractText;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractStemmedText: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractStemmedText: " + ex.getMessage());
             return null;
         }
     }
@@ -359,8 +349,7 @@ public class AbstractManager {
             return realKeywords;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveRealKeywords: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveRealKeywords: " + ex.getMessage());
             return null;
         }
     }
@@ -385,8 +374,7 @@ public class AbstractManager {
             return realKeywords;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveRealKeywords: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveRealKeywords: " + ex.getMessage());
             return null;
         }
     }
@@ -396,15 +384,14 @@ public class AbstractManager {
      * @param abs 
      */
     public void printRealKeywordsExistingInText(Abstract abs) {
-            logger.debug("***************REAL KEYPHRASES THAT EXIST IN ABSTRACT TEXT*****************",
-                    DebugLevel.DEBUG);
+            logger.debug("***************REAL KEYPHRASES THAT EXIST IN ABSTRACT TEXT*****************");
             ArrayList<String> realExistingKeyphrases =
                     retrieveRealKeywordsExistingInText(abs.getAbstractId());
             for (String phrase : realExistingKeyphrases) {
-                logger.debug(phrase, DebugLevel.DEBUG);
+                logger.debug(phrase);
             }
-            logger.debug("LIST SIZE: " + realExistingKeyphrases.size(), DebugLevel.DEBUG);
-            logger.debug("", DebugLevel.DEBUG);
+            logger.debug("LIST SIZE: " + realExistingKeyphrases.size());
+            logger.debug("");
     }
 
     /**
@@ -412,15 +399,14 @@ public class AbstractManager {
      * @param abs 
      */
     public void printRealKeywords(Abstract abs) {
-            logger.debug("***************REAL KEYPHRASES*****************",
-                    DebugLevel.DEBUG);
+            logger.debug("***************REAL KEYPHRASES*****************");
             ArrayList<String> realKeyphrases =
                     retrieveRealStemmedKeywords(abs.getAbstractId());
             for (String phrase : realKeyphrases) {
-                logger.debug(phrase, DebugLevel.DEBUG);
+                logger.debug(phrase);
             }
-            logger.debug("LIST SIZE: " + realKeyphrases.size(), DebugLevel.DEBUG);
-            logger.debug("", DebugLevel.DEBUG);
+            logger.debug("LIST SIZE: " + realKeyphrases.size());
+            logger.debug("");
     }
 
     /**
@@ -443,8 +429,7 @@ public class AbstractManager {
             return realKeywords;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveRealStemmedKeywords: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveRealStemmedKeywords: " + ex.getMessage());
             return null;
         }
     }
@@ -495,8 +480,7 @@ public class AbstractManager {
             return extractedKeywords;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveExtractedKeywords: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveExtractedKeywords: " + ex.getMessage());
             return null;
         }
     }
@@ -518,8 +502,7 @@ public class AbstractManager {
             return abstractType;
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in retrieveAbstractType: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in retrieveAbstractType: " + ex.getMessage());
             return null;
         }
     }
@@ -547,8 +530,7 @@ public class AbstractManager {
 
         }
         catch (SQLException ex) {
-            logger.debug("SQL Exception in isFromThisSource: " + ex.getMessage(),
-                    DebugLevel.ERROR);
+            logger.error("SQL Exception in isFromThisSource: " + ex.getMessage());
             return false;
         }
     }
@@ -633,7 +615,7 @@ public class AbstractManager {
             return rs.next();
         }
         catch (SQLException e) {
-            logger.debug("Error in existsInDatabase: " + e.getMessage(), DebugLevel.ERROR);
+            logger.error("Error in existsInDatabase: " + e.getMessage());
             return true;
         }
     }

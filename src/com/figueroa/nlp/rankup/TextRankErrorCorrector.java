@@ -12,7 +12,6 @@ import com.figueroa.nlp.textrank.NGram;
 import com.figueroa.nlp.textrank.TextRank;
 import com.figueroa.nlp.textrank.TextRankGraph;
 import com.figueroa.util.Abstract;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  * Static class.
@@ -325,7 +324,7 @@ public class TextRankErrorCorrector extends ErrorCorrector {
             // Step 1.5: Verify convergence
             double currentStandardError = getStandardError(statistics, convergenceScheme);
             logger.debug("Iteration: " + iteration + "\tStandard error: " +
-                    currentStandardError, DebugLevel.DEBUG);
+                    currentStandardError);
             if (verifyConvergence(standardErrorThreshold, currentStandardError, 
                     previousStandardError, convergenceRule, keyPhraseGraph,
                     textRankGraph.values(), revertGraphs, useDifferentialConvergence)) {
@@ -350,7 +349,7 @@ public class TextRankErrorCorrector extends ErrorCorrector {
             }
 
             // Step 3: Rerun TextRank
-            textRankGraph.runTextRank(false, logger);
+            textRankGraph.runTextRank(false);
 
             // Step 4: Recalculate Metrics
             metric_space = textRank.calculateMetrics();

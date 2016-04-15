@@ -10,8 +10,6 @@ import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.Lemmatizer;
 import com.figueroa.util.Abstract;
 import com.figueroa.util.AbstractManager;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 import com.figueroa.util.MiscUtils;
 
 /**
@@ -120,8 +118,7 @@ public class PhraseFeatures {
             final AbstractManager abstractManager,
             final POSTagger posTagger,
             final Lemmatizer lemmatizer,
-            final HashMap<String, Double> rakeKeyphrases,
-            final ExceptionLogger logger) throws Exception {
+            final HashMap<String, Double> rakeKeyphrases) throws Exception {
 
         PhraseFeatures features;
 

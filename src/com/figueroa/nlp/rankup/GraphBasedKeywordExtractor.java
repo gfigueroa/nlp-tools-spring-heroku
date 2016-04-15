@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.TreeSet;
+
+import org.apache.log4j.Logger;
+
+import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.rake.Rake;
 import com.figueroa.nlp.rake.RakeNode;
 import com.figueroa.nlp.textrank.MetricVector;
@@ -12,9 +16,7 @@ import com.figueroa.nlp.textrank.TextRank;
 import com.figueroa.nlp.textrank.TextRankGraph;
 import com.figueroa.nlp.textrank.TextRankNode;
 import com.figueroa.util.Abstract;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.nlp.KeyPhrase;
-import com.figueroa.nlp.Node;
+import com.figueroa.util.AbstractManager;
 
 /**
  * A wrapper class for the keyword extractor algorithm to use
@@ -28,6 +30,8 @@ import com.figueroa.nlp.Node;
  */
 public class GraphBasedKeywordExtractor {
     
+	private static final Logger logger = Logger.getLogger(AbstractManager.class);
+	
     public static enum KeywordExtractionMethod {
         TEXTRANK, RAKE
     }
@@ -54,8 +58,6 @@ public class GraphBasedKeywordExtractor {
         return null;
     }
     
-    private final ExceptionLogger logger;
-    
     private final RankUpProperties rankUpProperties;
     public final KeywordExtractionMethod keywordExtractionMethod;
     
@@ -68,10 +70,8 @@ public class GraphBasedKeywordExtractor {
      * @param rankUpProperties
      * @param textRank 
      */
-    public GraphBasedKeywordExtractor(ExceptionLogger logger, 
-            RankUpProperties rankUpProperties,
+    public GraphBasedKeywordExtractor(RankUpProperties rankUpProperties,
             TextRank textRank) {
-        this.logger = logger;
         this.rankUpProperties = rankUpProperties;
         this.textRank = textRank;
         this.rake = null;
@@ -84,10 +84,9 @@ public class GraphBasedKeywordExtractor {
      * @param rankUpProperties
      * @param rake 
      */
-    public GraphBasedKeywordExtractor(ExceptionLogger logger, 
-            RankUpProperties rankUpProperties,
+    public GraphBasedKeywordExtractor(
+    		RankUpProperties rankUpProperties,
             Rake rake) {
-        this.logger = logger;
         this.rankUpProperties = rankUpProperties;
         this.rake = rake;
         this.textRank = null;
@@ -138,7 +137,7 @@ public class GraphBasedKeywordExtractor {
         TreeSet<KeyPhrase> textRankKeyphrases = new TreeSet<>();
 
         // Step 1: Extract TextRank Keyphrases
-        logger.debug("1.1 Running TextRank...", ExceptionLogger.DebugLevel.INFO);
+        logger.info("1.1 Running TextRank...");
 
         Collection<MetricVector> metricVectorCollection =
                 textRank.run(abs.getOriginalText());
@@ -150,8 +149,7 @@ public class GraphBasedKeywordExtractor {
         }
 
         // Step 2: Map metric vectors with RankUp keyphrase nodes
-        logger.debug("1.2 Mapping metric vectors to RankUp keyphrase nodes...",
-                ExceptionLogger.DebugLevel.INFO);
+        logger.info("1.2 Mapping metric vectors to RankUp keyphrase nodes...");
         if (!rankUpProperties.useWholeTextRankGraph) {
             for (MetricVector mv : metricSpace) {
 
@@ -199,13 +197,12 @@ public class GraphBasedKeywordExtractor {
         ArrayList<KeyPhrase> rakeKeyphrases = new ArrayList<>();
 
         // Step 1: Extract Rake Keyphrases
-        logger.debug("1.1 Running RAKE...", ExceptionLogger.DebugLevel.INFO);
+        logger.info("1.1 Running RAKE...");
 
         rake.runRake(abs.getOriginalText());
 
         // Step 2: Map Rake Nodes with RankUp keyphrase nodes
-        logger.debug("1.2 Mapping RAKE Nodes to RankUp keyphrase nodes...",
-                ExceptionLogger.DebugLevel.INFO);
+        logger.info("1.2 Mapping RAKE Nodes to RankUp keyphrase nodes...");
         for (RakeNode rakeNode : rake.rakeFullGraph.values()) {
             KeyPhrase keyphrase = 
                     new KeyPhrase(rakeNode.text, rakeNode.rank, rakeNode.rank, rakeNode);

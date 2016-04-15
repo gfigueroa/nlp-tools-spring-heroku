@@ -34,7 +34,6 @@ package com.figueroa.nlp.textrank;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.math.util.MathUtils;
-import com.figueroa.util.ExceptionLogger;
 
 /**
  * Implements a point in the vector space representing the distance
@@ -46,6 +45,7 @@ public class MetricVector implements Comparable<MetricVector> {
     // logging
 
     private final static Log LOG = LogFactory.getLog(MetricVector.class.getName());
+    
     /**
      * Public members.
      */
@@ -67,16 +67,13 @@ public class MetricVector implements Comparable<MetricVector> {
             final NodeValue value, 
             final double link_rank, 
             final double count_rank, 
-            final double synset_rank, 
-            ExceptionLogger logger) {
+            final double synset_rank) {
         
         this.value = value;
 
         this.metric = Math.sqrt(((1.0D * link_rank * link_rank)
                 + (0.5D * count_rank * count_rank)
                 + (1.5D * synset_rank * synset_rank)) / 3.0D);
-        logger.debug("metric = sqrt(((1 x link_rank^2) + (0.5 x count_rank^2) + (1.5 x synset_rank ^2)) / 3) = " + metric, 
-                ExceptionLogger.DebugLevel.MORE_DETAIL);
 
         this.link_rank = MathUtils.round(link_rank, 2);
         this.count_rank = MathUtils.round(count_rank, 2);

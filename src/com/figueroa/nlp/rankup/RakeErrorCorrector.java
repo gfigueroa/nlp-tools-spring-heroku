@@ -2,15 +2,16 @@ package com.figueroa.nlp.rankup;
 
 import java.util.HashMap;
 import java.util.List;
+
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
-import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
+import org.apache.log4j.Logger;
+
 import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.Node;
 import com.figueroa.nlp.rake.Rake;
 import com.figueroa.nlp.rake.RakeNode;
 import com.figueroa.nlp.rake.RakeNode.RakeNodeType;
 import com.figueroa.util.Abstract;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  * Static class.
@@ -25,6 +26,8 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  */
 public class RakeErrorCorrector extends ErrorCorrector {
 
+	private static final Logger logger = Logger.getLogger(RakeErrorCorrector.class);
+	
     // Calculate d_j for every node in the graph (Step 1)
     private static void calculateDifferentials(List<RakeNode> wordNodes, 
             SummaryStatistics statistics, ConvergenceScheme convergenceScheme) {
@@ -151,7 +154,7 @@ public class RakeErrorCorrector extends ErrorCorrector {
 
             // Print keyphrase graph on every round (DETAIL)
             if (printGephiGraphs) {
-                rake.printRakeGraph(logger);
+                rake.printRakeGraph();
                 keyPhraseGraph.printGraph(false);
             }
             
@@ -164,7 +167,7 @@ public class RakeErrorCorrector extends ErrorCorrector {
             // Step 1.5: Verify convergence
             double currentStandardError = getStandardError(statistics, convergenceScheme);
             logger.debug("Iteration: " + iteration + "\tStandard error: " +
-                    currentStandardError, DebugLevel.DEBUG);
+                    currentStandardError);
             if (verifyConvergence(standardErrorThreshold, currentStandardError, 
                     previousStandardError, convergenceRule, keyPhraseGraph,
                     rakeWordNodes, revertGraphs, true)) {  // Always use differential convergence

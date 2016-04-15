@@ -9,8 +9,6 @@ import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.MetricVector;
 import com.figueroa.nlp.textrank.TextRank;
 import com.figueroa.nlp.textrank.WordNet;
-import com.figueroa.util.ExceptionLogger;
-import com.figueroa.util.ExceptionLogger.DebugLevel;
 
 /**
  *
@@ -18,16 +16,6 @@ import com.figueroa.util.ExceptionLogger.DebugLevel;
  */
 public class NLPMain {
 
-	// Debugging
-    public static DebugLevel DEBUG_LEVEL = DebugLevel.INFO;
-    
-    // Loggers
-    public final static String EXCEPTION_LOGGER_DIR =
-            "." + File.separator + "logs" + File.separator
-            + "exception_log_" + ExceptionLogger.now() + ".log";
-    public final static ExceptionLogger exceptionLogger = 
-            new ExceptionLogger(EXCEPTION_LOGGER_DIR, DEBUG_LEVEL);
-	
 	// Resources
 	public final static String RESOURCES_PATH = 
 			/*"WEB-INF" + */File.separator + "resources" + File.separator;
@@ -132,7 +120,7 @@ public class NLPMain {
 		languageModel = 
 	    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
 		WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-		TextRank textRank = new TextRank(exceptionLogger, stopwords, languageModel);
+		TextRank textRank = new TextRank(stopwords, languageModel);
 		
 		Collection<MetricVector> metricVectorCollection = textRank.run(text);
 		ArrayList<KeyPhrase> keywords = new ArrayList<>();
