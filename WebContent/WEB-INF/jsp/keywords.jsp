@@ -15,13 +15,15 @@
 		<h1>Keyword Extraction</h1>
 		<h2>Text</h2>
 		<form method="POST" action="keywords.html">
+			Method: <input type="text" name="method" value="textrank">
+			<br>
 			<textarea name="text" rows="10" cols="100">${text}</textarea>
 			<br> 
 			<input type="submit" value="Extract keywords!" />
 		</form>
 
 		<h2>Keywords</h2>
-		<textarea name="text" rows="10" cols="100" disabled>${keywordsText}</textarea>
+		<textarea name="keywords" rows="10" cols="100" disabled>${keywordsText}</textarea>
 	</center>
 	
 	<%@include file='footer.jsp'%>

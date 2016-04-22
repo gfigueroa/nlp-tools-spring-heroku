@@ -169,12 +169,8 @@ public class WebServiceController {
         
     	ArrayList<KeyPhrase> keywords;
     	ArrayList<KeyPhraseSimple> simpleKeywords = new ArrayList<>();    	
-    	if (method.equalsIgnoreCase("textrank")) {
-    		keywords = NLPMain.extractKeywords(contextPath, text);
-    	}
-    	else {
-    		return null;
-    	}
+
+    	keywords = NLPMain.extractKeywords(contextPath, text, method);
     	
     	for (KeyPhrase keyphrase : keywords) {
     		KeyPhraseSimple keyword = new KeyPhraseSimple(keyphrase.text, 

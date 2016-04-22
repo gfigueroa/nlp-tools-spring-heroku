@@ -11,7 +11,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.apache.commons.math.util.MathUtils;
 import org.apache.log4j.Logger;
 
 import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
@@ -30,6 +29,8 @@ import com.figueroa.util.Abstract.Type;
 import com.figueroa.util.AbstractManager;
 import com.figueroa.util.DatabaseManager;
 
+import com.figueroa.nlp.NLPMain;
+
 /**
  * Main class for running RankUp
  *
@@ -45,8 +46,6 @@ public class Main_Standalone {
 	
     // Runtime options
     // Debugging
-    public final static int PROPERTIES_FILES_TO_PROCESS = 1; // 0 for no limit
-    public final static int PROPERTIES_FILE_NUMBER_TO_PROCESS = 0; // 0 to ignore
     public final static boolean PRINT_RESULTS = false;
     public final static boolean PRINT_SETS = false;
     public final static boolean PRINT_GEPHI_GRAPHS = false;
@@ -76,44 +75,32 @@ public class Main_Standalone {
 
     // AbstractManager
     private static AbstractManager abstractManager;
-
+    
     // POSTagger and Lemmatizer
-    public final static String POS_TAGGER_MODEL =
-            "./pos_models/left3words-wsj-0-18.tagger";
-    public final static String POS_TAGGER_CONFIG =
-            "./pos_models/left3words-wsj-0-18.tagger2.props";
-    public final static String TAG_SEPARATOR = "_";
-    public final static String WN_HOME = "./lib/WordNet-3.0";
     private static POSTagger posTagger;
     private static Lemmatizer lemmatizer;
 
     // TextRank tools
-    public final static String log4j_conf = "./res/log4j.properties";
-    public final static String res_path = "./res";
-    public final static String lang_code = "en";
     public static LanguageModel languageModel;
     
     // Python and RAKE tools
     private static Rake rake;
-    
+
+    // RankUp-specific
     private static RankUp rankUp;
+    public final static String RANKUP_RESOURCES_PATH = NLPMain.RESOURCES_PATH + 
+    		"rankup";
+    private final static String RANKUP_PROPERTIES_FILE = RANKUP_RESOURCES_PATH +
+    		File.separator + "properties" + File.separator + "default.properties";
 
     // Stopwords
     private static Stopwords stopwords;
 
     /**
-     * Allows the program to pause and wait for user to press any key to continue
-     */
-    private static void systemPause() {
-        System.out.println("Press Any Key To Continue...");
-        new java.util.Scanner(System.in).nextLine();
-    }
-
-    /**
      * Loads the main components required by RankUp
      * @throws Exception 
      */
-    private static void loadComponents()
+    private static void loadComponents(String contextPath)
             throws Exception {
         
         logger.info("Loading components...");
@@ -122,8 +109,11 @@ public class Main_Standalone {
         stopwords = new Stopwords();
         
         // Load TextRank components
-        languageModel = LanguageModel.buildLanguage(res_path, lang_code);
-        WordNet.buildDictionary(res_path, lang_code);
+        languageModel = 
+        		LanguageModel.buildLanguage(contextPath + NLPMain.TEXTRANK_RESOURCES_PATH, 
+        				NLPMain.LANG_CODE);
+        WordNet.buildDictionary(contextPath + NLPMain.TEXTRANK_RESOURCES_PATH, 
+        		NLPMain.LANG_CODE);
         //textRank = new TextRank(logger, stopwords, languageModel);
         
         // Load DatabaseManager
@@ -135,10 +125,10 @@ public class Main_Standalone {
         
         // Load POSTagger
         posTagger =
-            new POSTagger(POS_TAGGER_MODEL, TAG_SEPARATOR);
+            new POSTagger(contextPath + NLPMain.POS_TAGGER_MODEL_PATH, NLPMain.TAG_SEPARATOR);
         
         // Load Lemmatizer
-        lemmatizer = new Lemmatizer(WN_HOME, posTagger);
+        lemmatizer = new Lemmatizer(contextPath + NLPMain.WN_HOME, posTagger);
         
         // Load and set up RAKE
         rake = new Rake();
@@ -267,13 +257,12 @@ public class Main_Standalone {
             RankUpProperties rankUpProperties,
             final Feature feature,
             List<KeyPhrase> textRankKeyphrases,
-            int rankUpPropertiesProcessedCount, 
             boolean GET_KEYPHRASES) throws Exception {
         
         String featureString = PhraseFeatures.getShortFeatureString(feature);
         
         List<KeyPhrase> keyphrases = new ArrayList<>();
-        if (rankUpPropertiesProcessedCount < 1 && GET_KEYPHRASES) {
+        if (GET_KEYPHRASES) {
 
             keyphrases =
                     getFeatureKeyphrases(textRankKeyphrases, feature);
@@ -301,34 +290,21 @@ public class Main_Standalone {
      * The main function
      * @param args 
      */
-    public static void main(String[] args) {
-        /*
-         * Arg 0: Properties file
-         * Arg 1: Whether to use a sample of the data or not
-         * Arg 2: Extracted Keywords table
-         * Arg 3: Debugging Information table
-         * Arg 4: Override DebugLevel
-         */
-        
-        if (args.length < 4) {
-            System.err.println("Incorrect argument list.");
-            System.err.println("Usage:   RankUp PROPERTIES_FILE SAMPLE_OR_NOT EXTRACTED_KEYWORDS_TABLE DEBUGGING_INFORMATION_TABLE [OVERRIDE_DEBUG_LEVEL]");
-            System.err.println("Example: RankUp ./properties/ieee.properties true RankUp_Extracted_Keyword RankUp_Debug_Sampled [INFO]");
-            return;
-        }
+    public static void extractRankUpKeywords(String contextPath) {
         
         try {
-            // Load RankUp Properties
-            final String propertiesFile = args[0];
-            List<RankUpProperties> rankUpPropertiesList = 
-                    loadRankUpProperties(propertiesFile);
-            
-            String abstractSource = rankUpPropertiesList.get(0).abstractSource;
 
             logger.info("Starting RankUp...");
-            logger.info("Properties file: " + propertiesFile);
 
-            loadComponents();
+            loadComponents(contextPath);
+            
+            // Load RankUp Properties
+            final String propertiesFile = contextPath + RANKUP_PROPERTIES_FILE;
+            List<RankUpProperties> rankUpPropertiesList = 
+                    loadRankUpProperties(propertiesFile);
+            RankUpProperties rankUpProperties = rankUpPropertiesList.get(0);
+            
+            String abstractSource = rankUpPropertiesList.get(0).abstractSource;
             
             // Retrieve all abstracts
             logger.info("Retrieving abstracts...");
@@ -338,32 +314,11 @@ public class Main_Standalone {
                     abstractSource, 
                     ABSTRACT_TABLE);
             
-            int rankUpPropertiesCount = 0;
-            int rankUpPropertiesProcessedCount = 0;
-            for (RankUpProperties rankUpProperties : rankUpPropertiesList) {
-                rankUpPropertiesCount++;
-                
-                if (rankUpPropertiesCount > PROPERTIES_FILES_TO_PROCESS) {
-                    break;
-                }
-                
-                // Check if there is a specific properties file to process
-                if (PROPERTIES_FILES_TO_PROCESS == 1 && 
-                        PROPERTIES_FILE_NUMBER_TO_PROCESS > 0) {
-                    if (rankUpPropertiesCount != PROPERTIES_FILE_NUMBER_TO_PROCESS) {
-                        continue;
-                    }
-                }
-                
-                logger.info("***************************************");
-                logger.info("RankUp Properties (" + rankUpPropertiesCount +
-                        "/" + rankUpPropertiesList.size() + "): " + 
-                        rankUpProperties.propertiesFileName + "\n" +
-                        rankUpProperties.toString());
-                logger.info("");
+            logger.info("***************************************");
+            logger.info("");
 
-                rankUp = new RankUp(
-                        //textRank,
+            rankUp = new RankUp(
+                    //textRank,
                         abstractManager, 
                         posTagger, 
                         lemmatizer, 
@@ -377,119 +332,88 @@ public class Main_Standalone {
                         USE_DIFFERENTIAL_CONVERGENCE);
   
                 String text = "Compatibility of systems of linear constraints over the set of natural numbers. " +
-                        "Criteria of compatibility of a system of linear Diophantine equations, strict inequations, " +
-                        "and nonstrict inequations are considered. Upper bounds for components of a minimal set of solutions and " +
-                        "algorithms of construction of minimal generating sets of solutions for all types of systems are given. " +
-                        "These criteria and the corresponding algorithms for constructing a minimal supporting set of solutions " +
-                        "can be used in solving all the considered types of systems and systems of mixed types.";
-                Abstract abs = new Abstract(0, text, Type.TESTING, lemmatizer);
+                    "Criteria of compatibility of a system of linear Diophantine equations, strict inequations, " +
+                    "and nonstrict inequations are considered. Upper bounds for components of a minimal set of solutions and " +
+                    "algorithms of construction of minimal generating sets of solutions for all types of systems are given. " +
+                    "These criteria and the corresponding algorithms for constructing a minimal supporting set of solutions " +
+                    "can be used in solving all the considered types of systems and systems of mixed types.";
+            Abstract abs = new Abstract(0, text, Type.TESTING, lemmatizer);
 
-                logger.info("Properties File: " + rankUpPropertiesCount + "/" +
-                        rankUpPropertiesList.size());
-                logger.info("Text: " + abs.getOriginalText() + "\n");
-
-                // Determine keyword extraction method
-                GraphBasedKeywordExtractor keywordExtractor;
-                if (rankUpProperties.keywordExtractionMethod == null ||
-                        rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
-                    
-                    TextRank textRank;
-                    // Check if this abstract already contains TextRank
-                    if (abs.getTextRank() != null) {
-                        textRank = abs.getTextRank();
-                    }
-                    else {
-                        textRank = new TextRank(stopwords, languageModel);
-                        abs.setTextRank(textRank);
-                    }
-                     
-                    keywordExtractor = new GraphBasedKeywordExtractor(
-                            rankUpProperties,
-                            textRank);
-                }
-                else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
-                    keywordExtractor = new GraphBasedKeywordExtractor(
-                            rankUpProperties,
-                            rake);
+            logger.info("Text: " + abs.getOriginalText() + "\n");
+            
+            // Determine keyword extraction method
+            GraphBasedKeywordExtractor keywordExtractor;
+            if (rankUpProperties.keywordExtractionMethod == null ||
+                    rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+                
+                TextRank textRank;
+                // Check if this abstract already contains TextRank
+                if (abs.getTextRank() != null) {
+                    textRank = abs.getTextRank();
                 }
                 else {
-                    logger.error("Wrong Keyword Extraction Method");
-                    return;
+                    textRank = new TextRank(stopwords, languageModel);
+                    abs.setTextRank(textRank);
                 }
-
-                // Run RankUp
-                List<KeyPhrase> rankUpKeyphrases;
-                List<KeyPhrase> originalKeyphrases;
-                try {
-                    rankUpKeyphrases = 
-                            rankUp.runRankUp(abs, PRINT_GEPHI_GRAPHS, keywordExtractor);
-                    originalKeyphrases = rankUp.getOriginalKeyphraseSet();
-                }
-                catch (Exception exception) {
-                    logger.error("Exception in runRankUp: " + 
-                            exception.getMessage());
-                    exception.printStackTrace();
-                    continue;
-                }
-
-                // Get TFIDF KeyPhrases
-                List<KeyPhrase> tfidfKeyphrases = getAndInsertFeatureKeyphrases(
-                        rankUpProperties, Feature.TFIDF_STEMMED,
-                        originalKeyphrases, rankUpPropertiesProcessedCount, 
-                        GET_TFIDF_KEYPHRASES);
-
-                // Get RIDF KeyPhrases
-                List<KeyPhrase> ridfKeyphrases = getAndInsertFeatureKeyphrases(
-                        rankUpProperties, Feature.RIDF_STEMMED,
-                        originalKeyphrases, rankUpPropertiesProcessedCount, 
-                        GET_RIDF_KEYPHRASES);
-
-
-                // Get Clusteredness KeyPhrases
-                List<KeyPhrase> clusterednessKeyphrases = getAndInsertFeatureKeyphrases(
-                        rankUpProperties, Feature.CLUSTEREDNESS_STEMMED,
-                        originalKeyphrases, rankUpPropertiesProcessedCount, 
-                        GET_CLUSTEREDNESS_KEYPHRASES);
-
-                // Get RAKE KeyPhrases
-                List<KeyPhrase> rakeKeyphrases= getAndInsertFeatureKeyphrases(
-                        rankUpProperties, Feature.RAKE_STEMMED,
-                        originalKeyphrases, rankUpPropertiesProcessedCount, 
-                        GET_RAKE_KEYPHRASES);
-
-                // Print and insert TextRank KeyPhrases into database
-                if (rankUpPropertiesProcessedCount < 1 && GET_ORIGINAL_KEYPHRASES) {
-                    printKeyPhrases(originalKeyphrases, 
-                            rankUpProperties.keywordExtractionMethod.toString());
-                }
-
-                // RankUp correctness for this abstract
-                Double keyphraseFinalTextRankScoreCorrectness = 
-                        rankUp.getKeyPhraseGraph().getKeyphraseFinalTextRankScoreCorrectness();
-                Double textRankNodeScoreCorrectness = 
-                        rankUp.getKeyPhraseGraph().getTextRankNodeScoreCorrectness();
-
-                logger.debug("");
-                logger.debug("Keyphrase final TextRank score correctness (this abstract): " + 
-                        (keyphraseFinalTextRankScoreCorrectness != null ?
-                                MathUtils.round(keyphraseFinalTextRankScoreCorrectness, 2) :
-                                ""));
-                logger.debug("TextRank node score correctness (this abstract): " + 
-                        (textRankNodeScoreCorrectness != null ?
-                                MathUtils.round(textRankNodeScoreCorrectness, 2) :
-                                ""));
-
-                // Insert debug information into database
-                logger.trace("Iterations: " + rankUp.getRankUpIterations());
-
-                logger.info("");
-                logger.info("RankUp completed for this text!");
-                logger.info("");
+                 
+                keywordExtractor = new GraphBasedKeywordExtractor(
+                        rankUpProperties,
+                        textRank);
             }
-        }
-        catch (NumberFormatException nfe) {
-            logger.error("Sample percentage must be decimal number "
-                        + "between 0 and 1 (e.g. 0.25)!");
+            else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
+                keywordExtractor = new GraphBasedKeywordExtractor(
+                        rankUpProperties,
+                        rake);
+            }
+            else {
+                logger.error("Wrong Keyword Extraction Method");
+                return;
+            }
+
+            // Run RankUp
+            List<KeyPhrase> rankUpKeyphrases = null;
+            List<KeyPhrase> originalKeyphrases = null;
+            try {
+                rankUpKeyphrases = 
+                        rankUp.runRankUp(abs, PRINT_GEPHI_GRAPHS, keywordExtractor);
+                originalKeyphrases = rankUp.getOriginalKeyphraseSet();
+            }
+            catch (Exception exception) {
+                logger.error("Exception in runRankUp: " + 
+                        exception.getMessage());
+                exception.printStackTrace();
+            }
+
+            // Get TFIDF KeyPhrases
+            List<KeyPhrase> tfidfKeyphrases = getAndInsertFeatureKeyphrases(
+                    rankUpProperties, Feature.TFIDF_STEMMED,
+                    originalKeyphrases, GET_TFIDF_KEYPHRASES);
+
+            // Get RIDF KeyPhrases
+            List<KeyPhrase> ridfKeyphrases = getAndInsertFeatureKeyphrases(
+                    rankUpProperties, Feature.RIDF_STEMMED,
+                    originalKeyphrases, GET_RIDF_KEYPHRASES);
+
+
+            // Get Clusteredness KeyPhrases
+            List<KeyPhrase> clusterednessKeyphrases = getAndInsertFeatureKeyphrases(
+                    rankUpProperties, Feature.CLUSTEREDNESS_STEMMED,
+                    originalKeyphrases, GET_CLUSTEREDNESS_KEYPHRASES);
+
+            // Get RAKE KeyPhrases
+            List<KeyPhrase> rakeKeyphrases= getAndInsertFeatureKeyphrases(
+                    rankUpProperties, Feature.RAKE_STEMMED,
+                    originalKeyphrases, GET_RAKE_KEYPHRASES);
+
+            // Print and insert TextRank KeyPhrases into database
+            if (GET_ORIGINAL_KEYPHRASES) {
+                printKeyPhrases(originalKeyphrases, 
+                        rankUpProperties.keywordExtractionMethod.toString());
+            }
+
+            logger.info("");
+            logger.info("RankUp completed for this text!");
+            logger.info("");
         }
         catch (FileNotFoundException fnfe) {
             logger.error("Properties file not found! " + fnfe.getMessage());

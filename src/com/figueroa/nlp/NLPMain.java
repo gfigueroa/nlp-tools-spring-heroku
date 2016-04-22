@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import com.figueroa.nlp.rankup.Main_Standalone;
 import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.MetricVector;
 import com.figueroa.nlp.textrank.TextRank;
@@ -111,28 +112,39 @@ public class NLPMain {
      * @return an ArrayList of KeyPhrase
      * @throws Exception
      */
-    public static ArrayList<KeyPhrase> extractKeywords(String contextPath, String text) throws Exception {
+    public static ArrayList<KeyPhrase> extractKeywords(String contextPath, 
+    		String text, String method) throws Exception {
+    	
     	// Check if path ends with separator
     	if (!contextPath.endsWith(File.separator)) {
     		contextPath += File.separator;
     	}
     	
-		languageModel = 
-	    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-		WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-		TextRank textRank = new TextRank(stopwords, languageModel);
-		
-		Collection<MetricVector> metricVectorCollection = textRank.run(text);
-		ArrayList<KeyPhrase> keywords = new ArrayList<>();
-		
-		for (MetricVector metricVector : metricVectorCollection) {
-			String keyword = metricVector.value.text;
-			double score = metricVector.metric;
-			KeyPhrase keyphrase = new KeyPhrase(keyword, score, score, null);
-			keywords.add(keyphrase);
-		}
-		Collections.sort(keywords);
+    	ArrayList<KeyPhrase> keywords = new ArrayList<>();
+    	if (method.equalsIgnoreCase("textrank")) {
+			languageModel = 
+		    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+			WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+			TextRank textRank = new TextRank(stopwords, languageModel);
+			
+			Collection<MetricVector> metricVectorCollection = textRank.run(text);
+			
+			for (MetricVector metricVector : metricVectorCollection) {
+				String keyword = metricVector.value.text;
+				double score = metricVector.metric;
+				KeyPhrase keyphrase = new KeyPhrase(keyword, score, score, null);
+				keywords.add(keyphrase);
+			}
+			Collections.sort(keywords);
+    	}
+    	else if (method.equalsIgnoreCase("rankup")) {
+    		Main_Standalone.extractRankUpKeywords(contextPath);
+    	}
+    	else {
+    		return null;
+    	}
 		
 		return keywords;
     }
+
 }
