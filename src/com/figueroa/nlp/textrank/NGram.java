@@ -31,7 +31,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.figueroa.nlp.textrank;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +76,8 @@ public class NGram extends NodeValue implements Comparable<NGram> {
     /**
      * Create a description text for this value.
      */
-    public String getDescription() {
+    @Override
+	public String getDescription() {
         return "NGRAM" + '\t' + getCollocation();
     }
 
@@ -97,7 +97,8 @@ public class NGram extends NodeValue implements Comparable<NGram> {
     /**
      * Compare method for sort ordering.
      */
-    public int compareTo(final NGram that) {
+    @Override
+	public int compareTo(final NGram that) {
         if (this.length > that.length) {
             return -1;
         }

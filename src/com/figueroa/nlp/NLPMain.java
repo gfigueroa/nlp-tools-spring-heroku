@@ -4,8 +4,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-import com.figueroa.nlp.rankup.Main_Standalone;
+import com.figueroa.controller.WebServiceController.KeyPhraseSimple;
+import com.figueroa.nlp.KeyPhrase.RankingMethod;
+import com.figueroa.nlp.rankup.RankUpMain;
 import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.MetricVector;
 import com.figueroa.nlp.textrank.TextRank;
@@ -19,7 +22,7 @@ public class NLPMain {
 
 	// Resources
 	public final static String RESOURCES_PATH = 
-			/*"WEB-INF" + */File.separator + "resources" + File.separator;
+			/*"WEB-INF" + File.separator + */"resources" + File.separator;
 	
     // POSTagger and Lemmatizer
 	public final static String POS_TAGGER_MODEL_PATH =
@@ -112,7 +115,7 @@ public class NLPMain {
      * @return an ArrayList of KeyPhrase
      * @throws Exception
      */
-    public static ArrayList<KeyPhrase> extractKeywords(String contextPath, 
+    public static ArrayList<KeyPhraseSimple> extractKeywords(String contextPath, 
     		String text, String method) throws Exception {
     	
     	// Check if path ends with separator
@@ -120,31 +123,49 @@ public class NLPMain {
     		contextPath += File.separator;
     	}
     	
-    	ArrayList<KeyPhrase> keywords = new ArrayList<>();
-    	if (method.equalsIgnoreCase("textrank")) {
-			languageModel = 
-		    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-			WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-			TextRank textRank = new TextRank(stopwords, languageModel);
-			
-			Collection<MetricVector> metricVectorCollection = textRank.run(text);
-			
-			for (MetricVector metricVector : metricVectorCollection) {
-				String keyword = metricVector.value.text;
-				double score = metricVector.metric;
-				KeyPhrase keyphrase = new KeyPhrase(keyword, score, score, null);
-				keywords.add(keyphrase);
-			}
-			Collections.sort(keywords);
+    	RankingMethod rankingMethod = 
+    			KeyPhrase.getRankingMethodFromString(method);
+    	
+    	ArrayList<KeyPhraseSimple> keywords = new ArrayList<>();
+    	switch (rankingMethod) {
+    		case TEXTRANK:
+				languageModel = 
+			    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+				WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+				TextRank textRank = new TextRank(stopwords, languageModel);
+				
+				Collection<MetricVector> metricVectorCollection = textRank.run(text);
+				
+				for (MetricVector metricVector : metricVectorCollection) {
+					String keyword = metricVector.value.text;
+					double score = metricVector.metric;
+					KeyPhraseSimple keyphrase = new KeyPhraseSimple(keyword, score);
+					keywords.add(keyphrase);
+				}
+				Collections.sort(keywords);
+				break;
+    	
+    		case RANKUP:
+    		case RAKE:
+    		case TFIDF:
+    		case RIDF:
+    		case CLUSTEREDNESS:
+	    		List<KeyPhrase> keyphrases = 
+	    				(ArrayList<KeyPhrase>) RankUpMain.extractRankUpKeywords(
+	    						contextPath,
+	    						text,
+	    						rankingMethod);
+	    		for (KeyPhrase rankUpKeyphrase : keyphrases) {
+	    			KeyPhraseSimple keyphrase = 
+	    					new KeyPhraseSimple(rankUpKeyphrase.text,
+	    							rankUpKeyphrase.getRanking(rankingMethod));
+	    			keywords.add(keyphrase);
+	    		}
+	    		break;
+	    	default:
+	    		return null;
     	}
-    	else if (method.equalsIgnoreCase("rankup")) {
-    		Main_Standalone.extractRankUpKeywords(contextPath);
-    	}
-    	else {
-    		return null;
-    	}
-		
-		return keywords;
+    	
+	    return keywords;
     }
-
 }

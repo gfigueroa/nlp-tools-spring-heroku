@@ -74,7 +74,7 @@ public class RakeNode extends Node {
     @Override
     public void connect(final Node that, Double weight) {
         super.connect(that, weight);
-        RakeNode thisRakeNode = (RakeNode) this;
+        RakeNode thisRakeNode = this;
         RakeNode thatRakeNode = (RakeNode) that;
         this.originalEdges.put(thatRakeNode, weight);
         thatRakeNode.originalEdges.put(thisRakeNode, weight);

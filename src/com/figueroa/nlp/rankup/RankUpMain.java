@@ -13,11 +13,12 @@ import java.util.List;
 import java.util.Properties;
 import org.apache.log4j.Logger;
 
-import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
+import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
 import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
 import com.figueroa.nlp.POSTagger;
 import com.figueroa.nlp.KeyPhrase;
+import com.figueroa.nlp.KeyPhrase.RankingMethod;
 import com.figueroa.nlp.Lemmatizer;
 import com.figueroa.nlp.Stopwords;
 import com.figueroa.nlp.rake.Rake;
@@ -40,39 +41,51 @@ import com.figueroa.nlp.NLPMain;
  * Hsinchu, Taiwan
  * January 2013
  */
-public class Main_Standalone {
+public class RankUpMain {
 
-	private static final Logger logger = Logger.getLogger(Main_Standalone.class);
+	private static final Logger logger = Logger.getLogger(RankUpMain.class);
 	
     // Runtime options
     // Debugging
-    public final static boolean PRINT_RESULTS = false;
     public final static boolean PRINT_SETS = false;
     public final static boolean PRINT_GEPHI_GRAPHS = false;
-    // Keyphrase sets to obtain
-    public final static boolean GET_TFIDF_KEYPHRASES = false;
-    public final static boolean GET_RIDF_KEYPHRASES = false;
-    public final static boolean GET_CLUSTEREDNESS_KEYPHRASES = false;
-    public final static boolean GET_RAKE_KEYPHRASES = false;
-    public final static boolean GET_ORIGINAL_KEYPHRASES = true;
-    public final static boolean GET_RANKUP_KEYPHRASES = true;
+    
     // Changes and bug fixes
-    public final static boolean PARTIAL_MATCHING = true;
     public final static boolean MINMAX_MID_BUG_FIX = true;
     public final static boolean CORRECT_NEGATIVE_WEIGHTS = true;
     public final static boolean DENORMALIZE_MODIFICATION_VALUE = true;
     public final static boolean USE_DIFFERENTIAL_CONVERGENCE = true;
     
     // DatabaseManager and AbstractManager
-    public final static String HOST_IP = "140.114.77.17";
-    public final static String DB_CLASS_NAME = "com.mysql.jdbc.Driver";
+    public final static String LOCAL_HOST = "localhost";
+    
+    public final static String MYSQL_CLASS = "com.mysql.jdbc.Driver";
+    public final static String MYSQL_CONNECTION_PREFIX = "jdbc:mysql";
+    public final static String MYSQL_DB_NAME = "New_RankUp_Tests";
+    public final static String MYSQL_USER = "root";
+    public final static String MYSQL_PASSWORD = "bakayarou00";
+    
+    public final static String REMOTE_HOST = "ec2-54-227-248-123.compute-1.amazonaws.com";
+    
+    public final static String POSTGRESQL_CLASS = "org.postgresql.Driver";
+    public final static String POSTGRESQL_CONNECTION_PREFIX = "jdbc:postgresql";
+    //public final static String POSTGRESQL_DB_NAME = "postgres";
+    public final static String POSTGRESQL_DB_NAME = "d27phf5prvh7cm";
+    //public final static String POSTGRESQL_USER = "postgres";
+    public final static String POSTGRESQL_USER = "cccdunxdiqtlwe";
+    //public final static String MYSQL_PASSWORD = "bakayarou00";
+    public final static String POSTGRESQL_PASSWORD = "mBCvdlqfcJUj4T3LVy4s9uTPjP";
+    public final static boolean REQUIRE_SSL = true;
+    
+    public final static String DB_CLASS_NAME = POSTGRESQL_CLASS;
     public final static String CONNECTION_STRING =
-            "jdbc:mysql://" + HOST_IP + "/New_RankUp_Tests";
-    public final static String USER = "root";
-    public final static String PASSWORD = "bakayarou00";
+            POSTGRESQL_CONNECTION_PREFIX + "://" + REMOTE_HOST + "/" + 
+            POSTGRESQL_DB_NAME + (REQUIRE_SSL ? "?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory" : "");
+    public final static String USER = POSTGRESQL_USER;
+    public final static String PASSWORD = POSTGRESQL_PASSWORD;
     private static DatabaseManager databaseManager;
     public final static String ABSTRACT_TABLE = "Abstract";
-
+    
     // AbstractManager
     private static AbstractManager abstractManager;
     
@@ -85,6 +98,8 @@ public class Main_Standalone {
     
     // Python and RAKE tools
     private static Rake rake;
+    public final static String PYTHON_RESOURCES_PATH = 
+    		NLPMain.RESOURCES_PATH + "python";
 
     // RankUp-specific
     private static RankUp rankUp;
@@ -95,7 +110,7 @@ public class Main_Standalone {
 
     // Stopwords
     private static Stopwords stopwords;
-
+    
     /**
      * Loads the main components required by RankUp
      * @throws Exception 
@@ -131,7 +146,7 @@ public class Main_Standalone {
         lemmatizer = new Lemmatizer(contextPath + NLPMain.WN_HOME, posTagger);
         
         // Load and set up RAKE
-        rake = new Rake();
+        rake = new Rake(contextPath + PYTHON_RESOURCES_PATH);
     }
 
     /**
@@ -192,15 +207,15 @@ public class Main_Standalone {
      */
     public static void printKeyPhrases(List<KeyPhrase> keyPhrases, String method) {
 
-        logger.debug("");
-        logger.debug("***********" + method + "************");
-        logger.debug("*Size: " + keyPhrases.size() + "*");
+        logger.info("");
+        logger.info("***********" + method + "************");
+        logger.info("*Size: " + keyPhrases.size() + "*");
         for (KeyPhrase keyPhrase : keyPhrases) {
             String features = keyPhrase.getFeatures() != null ?
                     keyPhrase.getFeatures().toString() : "";
-            logger.debug(keyPhrase.toString() + "\t" + features);
+            logger.info(keyPhrase.toString() + "\t" + features);
         }
-        logger.debug("");
+        logger.info("");
     }
     
     /**
@@ -253,44 +268,44 @@ public class Main_Standalone {
      * @return
      * @throws Exception 
      */
-    private static List<KeyPhrase> getAndInsertFeatureKeyphrases(
+    private static List<KeyPhrase> getFeatureKeyphrases(
             RankUpProperties rankUpProperties,
             final Feature feature,
-            List<KeyPhrase> textRankKeyphrases,
-            boolean GET_KEYPHRASES) throws Exception {
+            List<KeyPhrase> textRankKeyphrases) throws Exception {
         
         String featureString = PhraseFeatures.getShortFeatureString(feature);
         
         List<KeyPhrase> keyphrases = new ArrayList<>();
-        if (GET_KEYPHRASES) {
 
-            keyphrases =
-                    getFeatureKeyphrases(textRankKeyphrases, feature);
+        keyphrases =
+                getFeatureKeyphrases(textRankKeyphrases, feature);
 
-            printKeyPhrases(keyphrases, featureString);
+        printKeyPhrases(keyphrases, featureString);
 
-            // Get KeyPhraseGraph
-            if (PRINT_SETS) {
-                KeyPhraseGraph graph = new KeyPhraseGraph(
-                        keyphrases,
-                        rankUpProperties.setAssignmentApproach,
-                        rankUpProperties.featureLowerBound, 
-                        rankUpProperties.featureUpperBound,
-                        feature);
-                logger.debug("**** " + featureString + " Sets ****");
-                graph.printFeatureSet(SetLevel.LOW);
-                graph.printFeatureSet(SetLevel.MID);
-                graph.printFeatureSet(SetLevel.HIGH);
-            }
+        // Get KeyPhraseGraph
+        if (PRINT_SETS) {
+            KeyPhraseGraph graph = new KeyPhraseGraph(
+                    keyphrases,
+                    rankUpProperties.setAssignmentApproach,
+                    rankUpProperties.featureLowerBound, 
+                    rankUpProperties.featureUpperBound,
+                    feature);
+            logger.debug("**** " + featureString + " Sets ****");
+            graph.printFeatureSet(SetLevel.LOW);
+            graph.printFeatureSet(SetLevel.MID);
+            graph.printFeatureSet(SetLevel.HIGH);
         }
+
         return keyphrases;
     }
     
     /**
-     * The main function
-     * @param args 
+     * Run RankUp with the corresponding properties and configuration.
+     * @param contextPath
+     * @param text
      */
-    public static void extractRankUpKeywords(String contextPath) {
+    public static List<KeyPhrase> extractRankUpKeywords(String contextPath, 
+    		String text, RankingMethod rankingMethod) {
         
         try {
 
@@ -330,13 +345,7 @@ public class Main_Standalone {
                         CORRECT_NEGATIVE_WEIGHTS,
                         DENORMALIZE_MODIFICATION_VALUE,
                         USE_DIFFERENTIAL_CONVERGENCE);
-  
-                String text = "Compatibility of systems of linear constraints over the set of natural numbers. " +
-                    "Criteria of compatibility of a system of linear Diophantine equations, strict inequations, " +
-                    "and nonstrict inequations are considered. Upper bounds for components of a minimal set of solutions and " +
-                    "algorithms of construction of minimal generating sets of solutions for all types of systems are given. " +
-                    "These criteria and the corresponding algorithms for constructing a minimal supporting set of solutions " +
-                    "can be used in solving all the considered types of systems and systems of mixed types.";
+
             Abstract abs = new Abstract(0, text, Type.TESTING, lemmatizer);
 
             logger.info("Text: " + abs.getOriginalText() + "\n");
@@ -344,7 +353,7 @@ public class Main_Standalone {
             // Determine keyword extraction method
             GraphBasedKeywordExtractor keywordExtractor;
             if (rankUpProperties.keywordExtractionMethod == null ||
-                    rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+                    rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
                 
                 TextRank textRank;
                 // Check if this abstract already contains TextRank
@@ -360,14 +369,14 @@ public class Main_Standalone {
                         rankUpProperties,
                         textRank);
             }
-            else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
+            else if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.RAKE) {
                 keywordExtractor = new GraphBasedKeywordExtractor(
                         rankUpProperties,
                         rake);
             }
             else {
                 logger.error("Wrong Keyword Extraction Method");
-                return;
+                return null;
             }
 
             // Run RankUp
@@ -385,45 +394,67 @@ public class Main_Standalone {
             }
 
             // Get TFIDF KeyPhrases
-            List<KeyPhrase> tfidfKeyphrases = getAndInsertFeatureKeyphrases(
+            List<KeyPhrase> tfidfKeyphrases = getFeatureKeyphrases(
                     rankUpProperties, Feature.TFIDF_STEMMED,
-                    originalKeyphrases, GET_TFIDF_KEYPHRASES);
+                    originalKeyphrases);
 
             // Get RIDF KeyPhrases
-            List<KeyPhrase> ridfKeyphrases = getAndInsertFeatureKeyphrases(
+            List<KeyPhrase> ridfKeyphrases = getFeatureKeyphrases(
                     rankUpProperties, Feature.RIDF_STEMMED,
-                    originalKeyphrases, GET_RIDF_KEYPHRASES);
+                    originalKeyphrases);
 
 
             // Get Clusteredness KeyPhrases
-            List<KeyPhrase> clusterednessKeyphrases = getAndInsertFeatureKeyphrases(
+            List<KeyPhrase> clusterednessKeyphrases = getFeatureKeyphrases(
                     rankUpProperties, Feature.CLUSTEREDNESS_STEMMED,
-                    originalKeyphrases, GET_CLUSTEREDNESS_KEYPHRASES);
+                    originalKeyphrases);
 
             // Get RAKE KeyPhrases
-            List<KeyPhrase> rakeKeyphrases= getAndInsertFeatureKeyphrases(
+            List<KeyPhrase> rakeKeyphrases= getFeatureKeyphrases(
                     rankUpProperties, Feature.RAKE_STEMMED,
-                    originalKeyphrases, GET_RAKE_KEYPHRASES);
+                    originalKeyphrases);
 
-            // Print and insert TextRank KeyPhrases into database
-            if (GET_ORIGINAL_KEYPHRASES) {
-                printKeyPhrases(originalKeyphrases, 
-                        rankUpProperties.keywordExtractionMethod.toString());
-            }
+            // Print TextRank KeyPhrases
+            printKeyPhrases(originalKeyphrases, 
+                    rankUpProperties.keywordExtractionMethod.toString());
+            
+            // Print RankUp KeyPhrases into database
+            printKeyPhrases(rankUpKeyphrases, "RankUp");
 
             logger.info("");
             logger.info("RankUp completed for this text!");
             logger.info("");
+            
+            switch (rankingMethod) {
+	            case RANKUP:
+	            	//return rankUp.getSortedKeyphrases(rankUpKeyphrases);
+	            	return rankUpKeyphrases;
+	            case TEXTRANK:
+	            	return originalKeyphrases;
+	            case RAKE:
+	            	return rakeKeyphrases;
+	            case TFIDF:
+	            	return tfidfKeyphrases;
+	            case RIDF:
+	            	return ridfKeyphrases;
+	            case CLUSTEREDNESS:
+	            	return clusterednessKeyphrases;
+	            default:
+	            	return null;
+            }
         }
         catch (FileNotFoundException fnfe) {
             logger.error("Properties file not found! " + fnfe.getMessage());
+            return null;
         }
         catch (IOException ioe) {
             logger.error("IO Exception! " + ioe.getMessage());
+            return null;
         }
         catch (Exception e) {
             logger.error("Exception in RankUp Main: " + e.getMessage());
             e.printStackTrace();
+            return null;
         }
     }
 }

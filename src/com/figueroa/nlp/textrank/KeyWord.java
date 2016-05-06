@@ -60,7 +60,8 @@ public class KeyWord extends NodeValue {
     /**
      * Create a description text for this value.
      */
-    public String getDescription() {
+    @Override
+	public String getDescription() {
         return "KEYWORD" + '\t' + pos + ' ' + text;
     }
 }

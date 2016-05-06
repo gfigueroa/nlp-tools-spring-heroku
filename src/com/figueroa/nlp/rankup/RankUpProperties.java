@@ -5,7 +5,7 @@ import com.figueroa.nlp.rankup.ErrorCorrector.ConvergenceRule;
 import com.figueroa.nlp.rankup.ErrorCorrector.ConvergenceScheme;
 import com.figueroa.nlp.rankup.ErrorDetector.ErrorDetectingApproach;
 import com.figueroa.nlp.rankup.ErrorDetector.ExpectedScoreValue;
-import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
+import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetAssignmentApproach;
 import com.figueroa.util.Abstract;
 import com.figueroa.util.Abstract.Type;
@@ -37,7 +37,7 @@ public class RankUpProperties {
 //    public final WeightUpdatingScheme weightUpdatingScheme;
     public final ConvergenceRule convergenceRule;
     public final boolean revertGraphs;
-    public final KeywordExtractionMethod keywordExtractionMethod;
+    public final GraphBasedKeywordExtractionMethod keywordExtractionMethod;
 
     public RankUpProperties(String propertiesFileName, Properties props) 
             throws Exception {
@@ -68,18 +68,18 @@ public class RankUpProperties {
             this.standardErrorThreshold =
                     Double.parseDouble(props.getProperty("standard_error_threshold"));
             this.convergenceScheme =
-                    TextRankErrorCorrector.getConvergenceSchemeFromString(
+                    ErrorCorrector.getConvergenceSchemeFromString(
                             props.getProperty("convergence_scheme"));
 //            this.weightUpdatingScheme =
 //                    TextRankErrorCorrector.getWeightUpdatingSchemeFromString(
 //                    props.getProperty("weight_updating_scheme"));
             this.convergenceRule = 
-                    TextRankErrorCorrector.getConvergenceRuleFromString(
+                    ErrorCorrector.getConvergenceRuleFromString(
                             props.getProperty("convergence_rule"));
             this.revertGraphs = 
                     Boolean.parseBoolean(props.getProperty("revert_graphs"));
             this.keywordExtractionMethod =
-                    GraphBasedKeywordExtractor.getKeywordExtractionMethodFromString(
+                    GraphBasedKeywordExtractor.getGraphBasedKeywordExtractionMethodFromString(
                             props.getProperty("keyword_extraction_method"));
         }
         catch (NumberFormatException e) {
@@ -104,7 +104,7 @@ public class RankUpProperties {
 //            WeightUpdatingScheme weightUpdatingScheme,
             ConvergenceRule convergenceRule,
             boolean revertGraphs,
-            KeywordExtractionMethod keywordExtractionMethod) {
+            GraphBasedKeywordExtractionMethod keywordExtractionMethod) {
 
             this.propertiesFileName = propertiesFileName;
             this.abstractSource = abstractSource;

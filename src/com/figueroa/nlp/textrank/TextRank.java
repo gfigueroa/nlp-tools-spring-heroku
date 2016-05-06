@@ -41,6 +41,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import com.figueroa.nlp.Node;
 import com.figueroa.nlp.Stopwords;
 
 import net.didion.jwnl.data.POS;
@@ -160,7 +161,7 @@ public class TextRank {
             }
         }
 
-        this.text = sb.toString();
+        TextRank.text = sb.toString();
 
         markTime("construct_graph");
 
@@ -178,7 +179,7 @@ public class TextRank {
 
         initTime();
 
-        final int max_results = (int) Math.round((double) graph.size() * TextRankGraph.KEYWORD_REDUCTION_FACTOR); // ORIGINAL
+        final int max_results = (int) Math.round(graph.size() * TextRankGraph.KEYWORD_REDUCTION_FACTOR); // ORIGINAL
 
         graph.runTextRank();
         graph.sortResults(max_results);
@@ -245,7 +246,7 @@ public class TextRank {
                 graph.put(n.key, n);
 
                 for (TextRankNode keyword_node : gram.nodes) {
-                    n.connect(keyword_node, TextRankNode.DEFAULT_EDGE_WEIGHT);
+                    n.connect(keyword_node, Node.DEFAULT_EDGE_WEIGHT);
                 }
             }
         }

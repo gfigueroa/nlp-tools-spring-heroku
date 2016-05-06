@@ -40,6 +40,8 @@ import net.didion.jwnl.data.Synset;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.figueroa.nlp.Node;
+
 /**
  * Implements a node value in a TextRank graph denoting a synset in
  * WordNet.
@@ -78,7 +80,8 @@ public class SynsetLink extends NodeValue {
     /**
      * Create a description text for this value.
      */
-    public String getDescription() {
+    @Override
+	public String getDescription() {
         final StringBuilder sb = new StringBuilder();
 
         sb.append(relation);
@@ -152,7 +155,7 @@ public class SynsetLink extends NodeValue {
             final SynsetLink synset_link = new SynsetLink(synset_key, synset, parent, relation, hops);
 
             node = TextRankNode.buildNode(synset_subgraph, synset_key, synset_link);
-            node.connect(parent, TextRankNode.DEFAULT_EDGE_WEIGHT);
+            node.connect(parent, Node.DEFAULT_EDGE_WEIGHT);
             synset_link.setParentNode(node); // SET PARENT NODE
 
             return node;
@@ -165,7 +168,7 @@ public class SynsetLink extends NodeValue {
                 synset_link.hops = hops;
             }
 
-            node.connect(parent, TextRankNode.DEFAULT_EDGE_WEIGHT);
+            node.connect(parent, Node.DEFAULT_EDGE_WEIGHT);
 
             if (LOG.isDebugEnabled()) {
                 LOG.debug("mark key on " + synset_key);

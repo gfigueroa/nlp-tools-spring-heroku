@@ -85,10 +85,10 @@ paths:
         type: string
       - name: method
         in: query
-        description: The keyword extraction method to use. Available methods are [textrank, ].
+        description: The keyword extraction method to use. Available methods are [rankup, textrank, rake, tfidf, ridf, clusteredness].
         required: false
         type: string
-        default: textrank
+        default: rankup
       responses:
         200:
           description: Keyword list

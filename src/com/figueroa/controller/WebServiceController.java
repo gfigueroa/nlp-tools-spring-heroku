@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.NLPMain;
+import com.figueroa.util.MiscUtils;
 
 /**
  * Controller for all web service calls.
@@ -26,7 +26,7 @@ public class WebServiceController {
 	@SuppressWarnings("unused")
 	private static final Logger logger = Logger.getLogger(WebServiceController.class);
 	
-	private class LemmatizedTextJSON {
+	private static class LemmatizedTextJSON {
 		public String originalText;
 		public String lemmatizedText;
 		public LemmatizedTextJSON(String originalText, String lemmatizedText) {
@@ -35,7 +35,7 @@ public class WebServiceController {
 		}
 	};
 	
-	private class TaggedTextJSON {
+	private static class TaggedTextJSON {
 		public String originalText;
 		public String taggedText;
 		public TaggedTextJSON(String originalText, String taggedText) {
@@ -44,13 +44,42 @@ public class WebServiceController {
 		}
 	};
 	
-	public class KeyPhraseSimple {
+	public static class KeyPhraseSimple implements Comparable<KeyPhraseSimple> {
 		public String text;
 		public double score;
 		public KeyPhraseSimple(String text, double score) {
 			this.text = text;
 			this.score = score;
 		}
+		@Override
+		public int compareTo(final KeyPhraseSimple that) {
+	        if (this.score > that.score) {
+	            return -1;
+	        }
+	        else if (this.score < that.score) {
+	            return 1;
+	        }
+	        else {
+	            return this.text.compareTo(that.text);
+	        }
+	    }
+	    @Override
+	    public String toString() {
+	        String output = "";
+	
+	        String adjustedText = text;
+	        while (adjustedText.length() < 40) {
+	            adjustedText = adjustedText.concat(" ");
+	        }
+	
+	        String scoreString = 
+	        		MiscUtils.convertDoubleToFixedCharacterString(score, 2);
+	        
+	        output += adjustedText;
+	        output += "S: " + scoreString; // Current Score
+	
+	        return output;
+	    }
 	}
 	
 	public class KeywordListJSON {
@@ -165,19 +194,10 @@ public class WebServiceController {
     		HttpServletRequest request) throws Exception {
     	
     	String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain nlpMain = new NLPMain(contextPath);
-        
-    	ArrayList<KeyPhrase> keywords;
-    	ArrayList<KeyPhraseSimple> simpleKeywords = new ArrayList<>();    	
+        //NLPMain nlpMain = new NLPMain(contextPath);	
 
-    	keywords = NLPMain.extractKeywords(contextPath, text, method);
-    	
-    	for (KeyPhrase keyphrase : keywords) {
-    		KeyPhraseSimple keyword = new KeyPhraseSimple(keyphrase.text, 
-    				keyphrase.getScore());
-    		simpleKeywords.add(keyword);
-    	}
-    	KeywordListJSON keywordList = new KeywordListJSON(text, simpleKeywords);
+    	ArrayList<KeyPhraseSimple> keywords = NLPMain.extractKeywords(contextPath, text, method);
+    	KeywordListJSON keywordList = new KeywordListJSON(text, keywords);
         
     	return keywordList;
     }

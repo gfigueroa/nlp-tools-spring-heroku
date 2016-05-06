@@ -33,6 +33,8 @@ package com.figueroa.nlp.textrank;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.figueroa.nlp.Node;
 import com.figueroa.nlp.Stopwords;
 
 /**
@@ -145,7 +147,7 @@ public class Sentence {
                 // emit nodes to construct the graph
 
                 if (last_node != null) {
-                    n.connect(last_node, TextRankNode.DEFAULT_EDGE_WEIGHT);
+                    n.connect(last_node, Node.DEFAULT_EDGE_WEIGHT);
                 }
 
                 last_node = n;
@@ -189,7 +191,7 @@ public class Sentence {
                 // emit nodes to construct the graph
 
                 if (last_node != null) {
-                    n.connect(last_node, TextRankNode.DEFAULT_EDGE_WEIGHT);
+                    n.connect(last_node, Node.DEFAULT_EDGE_WEIGHT);
                 }
 
                 last_node = n;

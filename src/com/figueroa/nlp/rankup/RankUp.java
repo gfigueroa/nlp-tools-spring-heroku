@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.KeywordExtractionMethod;
+import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
 import com.figueroa.nlp.POSTagger;
 import com.figueroa.nlp.KeyPhrase;
@@ -66,7 +66,21 @@ public class RankUp {
     // RAKE
     private final Rake rake;
 
-    // Constructor
+    /**
+     * RankUp Constructor, initialized with all its necessary components.
+     * @param abstractManager
+     * @param posTagger
+     * @param lemmatizer
+     * @param stopwords
+     * @param rake
+     * @param rankUpProperties
+     * @param trainingAbstracts
+     * @param minMaxMidBugFix
+     * @param correctNegativeWeights
+     * @param denormalizeModificationValue
+     * @param useDifferentialConvergence
+     * @throws Exception
+     */
     public RankUp(
             AbstractManager abstractManager,
             POSTagger posTagger, 
@@ -96,6 +110,14 @@ public class RankUp {
         this.USE_DIFFERENTIAL_CONVERGENCE = useDifferentialConvergence;
     }
 
+    /**
+     * Set the features for all keyphrases extracted by the base keyphrase extraction
+     * algorithm.
+     * @param keyPhrases
+     * @param abs
+     * @param force
+     * @throws Exception
+     */
     public void setKeyPhraseFeatures(List<KeyPhrase> keyPhrases, Abstract abs, boolean force)
             throws Exception {
 
@@ -104,7 +126,7 @@ public class RankUp {
             
             // First, get RAKE keywords
             HashMap<String, Double> rakeKeyphrases = null;
-            if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+            if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
                 rakeKeyphrases = rake.runRake(abs.getOriginalText());
             }
             
@@ -119,7 +141,12 @@ public class RankUp {
         }
     }
 
-    // Remove stop phrases and any subphrases that have lower ranks than their superphrases
+    /**
+     * Remove stop phrases and any subphrases that have lower ranks than their superphrases.
+     * @param oldKeyphrases
+     * @return
+     * @throws Exception
+     */
     private ArrayList postProcessKeyphrases(List<KeyPhrase> oldKeyphrases) throws Exception {
 
         ArrayList<KeyPhrase> newKeyphrases = new ArrayList<>();
@@ -166,7 +193,13 @@ public class RankUp {
         return newKeyphrases;
     }
 
-    // Main entry point of RankUp
+    /**
+     * Main RankUp algorithm.
+     * @param abs
+     * @param printGephiGraphs
+     * @param keywordExtractor
+     * @return
+     */
     public List<KeyPhrase> runRankUp(
             Abstract abs,
             //boolean newMethod, 
@@ -184,12 +217,12 @@ public class RankUp {
             ArrayList<KeyPhrase> feedbackKeyphraseList;
             ArrayList<KeyPhrase> realKeyphraseList;
             // In TextRank, use all keyphrases in the graph
-            if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+            if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
                 feedbackKeyphraseList = (ArrayList<KeyPhrase>) originalKeyphraseListFull;
                 realKeyphraseList = feedbackKeyphraseList;
             }
             // In RAKE, only use Word Nodes
-            else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
+            else if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.RAKE) {
                     feedbackKeyphraseList = new ArrayList<>();
                     realKeyphraseList = new ArrayList<>();
                 for (KeyPhrase keyphrase : originalKeyphraseListFull) {
@@ -238,7 +271,7 @@ public class RankUp {
             
             // 5. Perform error Feedback (3.4 Error Feedback)
             logger.info("5. Performing error feedback...");
-            if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+            if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
                 errorCorrectorIterations = TextRankErrorCorrector.performErrorFeedback(
                         abs,
                         keyPhraseGraph, 
@@ -254,7 +287,7 @@ public class RankUp {
                         DENORMALIZE_MODIFICATION_VALUE,
                         USE_DIFFERENTIAL_CONVERGENCE);
             }
-            else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE){
+            else if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.RAKE){
                 errorCorrectorIterations = RakeErrorCorrector.performErrorFeedback(
                         abs,
                         realKeyphraseList,
@@ -271,10 +304,10 @@ public class RankUp {
             
             // Sort keyphrases
             List<KeyPhrase> rankUpKeyphrases = null;
-            if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.TEXTRANK) {
+            if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
                 rankUpKeyphrases = keyPhraseGraph.getSortedKeyphrases();
             }
-            else if (rankUpProperties.keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
+            else if (rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.RAKE) {
                 rankUpKeyphrases = getSortedKeyphrases(realKeyphraseList);
             }
             
@@ -299,6 +332,10 @@ public class RankUp {
         }
     }
     
+    /**
+     * Get the original set of keyphrases extracted by the base extraction algorithm.
+     * @return
+     */
     public List<KeyPhrase> getOriginalKeyphraseSet() {
         
         Comparator comparator =
@@ -331,6 +368,11 @@ public class RankUp {
         return sortedUniqueNewKeyphrases;
     }
     
+    /**
+     * Get the sorted list of keyphrases extracted by RankUp
+     * @param keyphrases
+     * @return
+     */
     public List<KeyPhrase> getSortedKeyphrases(List<KeyPhrase> keyphrases) {
 
         List<KeyPhrase> sortedKeyphrases = keyphrases;

@@ -1,15 +1,16 @@
 package com.figueroa.controller;
  
-import com.figueroa.nlp.KeyPhrase;
-import com.figueroa.nlp.NLPMain;
-
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.figueroa.controller.WebServiceController.KeyPhraseSimple;
+import com.figueroa.nlp.NLPMain;
 
 @Controller
 public class KeywordExtractionController {
@@ -47,9 +48,9 @@ public class KeywordExtractionController {
             String method = request.getParameter("method");
             String keywordsText = "";
             if (text != null) {
-                ArrayList<KeyPhrase> keywords = 
+                ArrayList<KeyPhraseSimple> keywords = 
                 		NLPMain.extractKeywords(contextPath, text, method);
-                for (KeyPhrase keyword : keywords) {
+                for (KeyPhraseSimple keyword : keywords) {
                 	keywordsText += keyword + "\n";
                 }
             }
@@ -57,6 +58,7 @@ public class KeywordExtractionController {
                 text = "";
             }
 
+            model.addAttribute("method", method);
             model.addAttribute("text", text);
             model.addAttribute("keywordsText", keywordsText);
             

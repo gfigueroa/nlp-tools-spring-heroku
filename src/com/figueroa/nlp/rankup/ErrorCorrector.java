@@ -215,7 +215,7 @@ public abstract class ErrorCorrector {
                 standardError = statistics.getSumsq() * 0.5;
                 break;
             case TEXTRANK:
-                standardError = statistics.getStandardDeviation() / Math.sqrt((double) statistics.getN());
+                standardError = statistics.getStandardDeviation() / Math.sqrt(statistics.getN());
                 break;
         }
 

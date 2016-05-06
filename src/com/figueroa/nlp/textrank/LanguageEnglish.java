@@ -34,9 +34,7 @@ package com.figueroa.nlp.textrank;
 import java.io.File;
 
 import opennlp.tools.lang.english.ParserTagger;
-import opennlp.tools.lang.english.SentenceDetector;
 import opennlp.tools.lang.english.Tokenizer;
-import opennlp.tools.sentdetect.SentenceDetectorME;
 import opennlp.tools.util.Sequence;
 
 import org.tartarus.snowball.ext.englishStemmer;
@@ -75,7 +73,8 @@ public class LanguageEnglish extends LanguageModel {
     /**
      * Load libraries for OpenNLP for this specific language.
      */
-    public void loadResources(final String path) throws Exception {
+    @Override
+	public void loadResources(final String path) throws Exception {
         splitter_en = new SentParDetector();
 
         /** /
@@ -94,7 +93,8 @@ public class LanguageEnglish extends LanguageModel {
     /**
      * Split sentences within the paragraph text.
      */
-    public String[] splitParagraph(final String text) {
+    @Override
+	public String[] splitParagraph(final String text) {
         return splitter_en.markupRawText(2, text).split("\\n");
 
         /** /
@@ -105,7 +105,8 @@ public class LanguageEnglish extends LanguageModel {
     /**
      * Tokenize the sentence text into an array of tokens.
      */
-    public String[] tokenizeSentence(final String text) {
+    @Override
+	public String[] tokenizeSentence(final String text) {
         final String[] token_list = tokenizer_en.tokenize(text);
 
         for (int i = 0; i < token_list.length; i++) {
@@ -118,7 +119,8 @@ public class LanguageEnglish extends LanguageModel {
     /**
      * Run a part-of-speech tagger on the sentence token list.
      */
-    public String[] tagTokens(final String[] token_list) {
+    @Override
+	public String[] tagTokens(final String[] token_list) {
         final Sequence[] sequences = tagger_en.topKSequences(token_list);
         final String[] tag_list = new String[token_list.length];
 
@@ -136,35 +138,40 @@ public class LanguageEnglish extends LanguageModel {
      * Prepare a stable key for a graph node (stemmed, lemmatized)
      * from a token.
      */
-    public String getNodeKey(final String text, final String pos) throws Exception {
+    @Override
+	public String getNodeKey(final String text, final String pos) throws Exception {
         return pos.substring(0, 2) + stemToken(scrubToken(text)).toLowerCase();
     }
 
     /**
      * Determine whether the given PoS tag is a noun.
      */
-    public boolean isNoun(final String pos) {
+    @Override
+	public boolean isNoun(final String pos) {
         return pos.startsWith("NN");
     }
 
     /**
      * Determine whether the given PoS tag is an adjective.
      */
-    public boolean isAdjective(final String pos) {
+    @Override
+	public boolean isAdjective(final String pos) {
         return pos.startsWith("JJ");
     }
 
     /**
      * Determine whether the given PoS tag is a verb.
      */
-    public boolean isVerb(final String pos) {
+    @Override
+	public boolean isVerb(final String pos) {
         return pos.startsWith("VB");
     }
 
     /**
      * Perform stemming on the given token.
      */
-    public String stemToken(final String token) {
+    @Override
+	public String stemToken(final String token) {
         stemmer_en.setCurrent(token);
         stemmer_en.stem();
 

@@ -178,7 +178,7 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
             }
 
             final double standard_error =
-                    dist_stats.getStandardDeviation() / Math.sqrt((double) dist_stats.getN());
+                    dist_stats.getStandardDeviation() / Math.sqrt(dist_stats.getN());
 
             if (debug) {
                 logger.trace("iteration: " + k + " error: " + standard_error);
@@ -208,7 +208,8 @@ public class TextRankGraph extends TreeMap<String, TextRankNode> {
         Arrays.sort(node_list,
                 new Comparator<TextRankNode>() {
 
-                    public int compare(TextRankNode n1, TextRankNode n2) {
+                    @Override
+					public int compare(TextRankNode n1, TextRankNode n2) {
                         if (n1.getRank() > n2.getRank()) {
                             return -1;
                         }

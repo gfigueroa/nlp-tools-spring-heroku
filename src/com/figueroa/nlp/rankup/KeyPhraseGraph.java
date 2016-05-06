@@ -470,7 +470,8 @@ public class KeyPhraseGraph extends TreeMap<String, KeyPhrase> {
 
         Comparator comparator =
                 new Comparator<KeyPhrase>() {
-                    public int compare(KeyPhrase a, KeyPhrase b) {
+                    @Override
+					public int compare(KeyPhrase a, KeyPhrase b) {
                         Double featureA = a.getFeatures().getFeatureValue(feature, a);
                         Double featureB = b.getFeatures().getFeatureValue(feature, b);
                         return featureB.compareTo(featureA);

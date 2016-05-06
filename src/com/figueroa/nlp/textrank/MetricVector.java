@@ -88,7 +88,8 @@ public class MetricVector implements Comparable<MetricVector> {
     /**
      * Compare method for sort ordering.
      */
-    public int compareTo(final MetricVector that) {
+    @Override
+	public int compareTo(final MetricVector that) {
         if (this.metric > that.metric) {
             return -1;
         }

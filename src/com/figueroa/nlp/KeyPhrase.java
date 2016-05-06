@@ -1,6 +1,7 @@
 package com.figueroa.nlp;
 
 import java.util.Comparator;
+
 import com.figueroa.util.MiscUtils;
 
 /**
@@ -14,6 +15,10 @@ import com.figueroa.util.MiscUtils;
  */
 public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
 
+    public static enum RankingMethod {
+    	RANKUP, TEXTRANK, RAKE, TFIDF, RIDF, CLUSTEREDNESS
+    }
+	
     public static enum ScoreDirection {
         NO_CHANGE, INCREASE, DECREASE
     }
@@ -30,6 +35,16 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
     private double previousFinalTextRankScore;
     private double previousScore;
 
+    public static RankingMethod getRankingMethodFromString(
+    		String methodString) {
+    	for (RankingMethod method : RankingMethod.values()) {
+    		if (methodString.equalsIgnoreCase(method.toString())) {
+    			return method;
+    		}
+    	}
+    	return null;
+    }
+    
     public KeyPhrase(String text, 
             double score, 
             double originalTextRankScore,
@@ -250,7 +265,8 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
      * Compare method for sort ordering.
      * @param that
      */
-    public int compareTo(final KeyPhrase that) {
+    @Override
+	public int compareTo(final KeyPhrase that) {
         if (this.score > that.score) {
             return -1;
         }
@@ -268,7 +284,8 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
     public static Comparator<KeyPhrase> TFIDFStemmedComparatorAscending =
             new Comparator<KeyPhrase>() {
 
-        public int compare(KeyPhrase keyPhrase1, KeyPhrase keyPhrase2) {
+        @Override
+		public int compare(KeyPhrase keyPhrase1, KeyPhrase keyPhrase2) {
             Double keyPhraseTFIDFStemmed1 = keyPhrase1.getFeatures().tfidfStemmed;
             Double keyPhraseTFIDFStemmed2 = keyPhrase2.getFeatures().tfidfStemmed;
 
@@ -283,7 +300,8 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
     public static Comparator<KeyPhrase> TFIDFStemmedComparatorDescending =
             new Comparator<KeyPhrase>() {
 
-        public int compare(KeyPhrase keyPhrase1, KeyPhrase keyPhrase2) {
+        @Override
+		public int compare(KeyPhrase keyPhrase1, KeyPhrase keyPhrase2) {
             Double keyPhraseTFIDFStemmed1 = keyPhrase1.getFeatures().tfidfStemmed;
             Double keyPhraseTFIDFStemmed2 = keyPhrase2.getFeatures().tfidfStemmed;
 
@@ -314,21 +332,28 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
         this.previousScore = -1.0;
     }
     
-    @Override
-    public String toString() {
-        String output = "";
-
-        String adjustedText = text;
-        while (adjustedText.length() < 40) {
-            adjustedText = adjustedText.concat(" ");
-        }
-
-        String scoreString = MiscUtils.convertDoubleToFixedCharacterString(score, 2);
-        
-        output += adjustedText;
-        output += "S: " + scoreString; // Current Score
-
-        return output;
+    /**
+     * Get the keyphrases's specific ranking, given the ranking method.
+     * @param rankingMethod
+     * @return
+     */
+    public double getRanking(RankingMethod rankingMethod) {
+    	switch (rankingMethod) {
+    		case RANKUP:
+    			return this.finalTextRankScore;
+    		case TEXTRANK:
+    			return this.originalNodeScore;
+    		case RAKE:
+    			return this.getFeatures().rakeStemmed;
+    		case TFIDF:
+    			return this.getFeatures().tfidfStemmed;
+    		case RIDF:
+    			return this.getFeatures().ridfStemmed;
+    		case CLUSTEREDNESS:
+    			return this.getFeatures().clusterednessStemmed;
+    		default:
+    			return 0;
+    	}
     }
     
 //    @Override
@@ -336,48 +361,65 @@ public class KeyPhrase extends Phrase implements Comparable<KeyPhrase> {
 //        String output = "";
 //
 //        String adjustedText = text;
-//        while (adjustedText.length() < 45) {
+//        while (adjustedText.length() < 40) {
 //            adjustedText = adjustedText.concat(" ");
 //        }
 //
-//        String previousFinalTextRankScoreString =
-//                MiscUtils.convertDoubleToFixedCharacterString(previousFinalTextRankScore, 2);
-//        String finalTextRankScoreString = 
-//                MiscUtils.convertDoubleToFixedCharacterString(finalTextRankScore, 2);
-//        String originalTextRankScoreString = 
-//                MiscUtils.convertDoubleToFixedCharacterString(originalTextRankScore, 2);
-//        
-//        String previousScoreString = MiscUtils.convertDoubleToFixedCharacterString(previousScore, 2);
 //        String scoreString = MiscUtils.convertDoubleToFixedCharacterString(score, 2);
-//        String originalScoreString = MiscUtils.convertDoubleToFixedCharacterString(originalScore, 2);
-//        
-//        String previousNodeScoreString = 
-//                MiscUtils.convertDoubleToFixedCharacterString(node.getPreviousRank(), 2);
-//        String textRankNodeScoreString = MiscUtils.convertDoubleToFixedCharacterString(node.getRank(), 2);
-//        String originalNodeScoreString = 
-//                MiscUtils.convertDoubleToFixedCharacterString(originalNodeScore, 2);
-//        
-//        String expectedScoreString = MiscUtils.convertDoubleToFixedCharacterString(expectedScore, 2);
 //        
 //        output += adjustedText;
-//        output += "FTRS: " + finalTextRankScoreString;                  // Final TextRank Score (metric)
-//        output += " (P: " + previousFinalTextRankScoreString + ")";
-//        output += " [" + getScoreDirectionString(getFinalTextRankScoreDirection());
-//        output += " (" + MiscUtils.getBooleanCheckString(finalTextRankScoreDirectionIsCorrect()) + ")]";
-//        output += ", OTRS: " + originalTextRankScoreString;             // Original TextRank Score (metric)
-//        output += ", S: " + scoreString;                                // Current Score
-//        output += " (P: " + previousScoreString + ")";
-//        output += " [" + getScoreDirectionString(getCurrentScoreDirection());
-//        output += " (" + MiscUtils.getBooleanCheckString(currentScoreDirectionIsCorrect()) + ")]";
-//        output += ", OS: " + originalScoreString;                       // Original Score
-//        output += ", TRNS: " + textRankNodeScoreString;                 // Current TextRank Node Score
-//        output += " (P: " + previousNodeScoreString + ")";
-//        output += " [" + getScoreDirectionString(getCurrentNodeScoreDirection());
-//        output += " (" + MiscUtils.getBooleanCheckString(textRankNodeScoreDirectionIsCorrect()) + ")]";
-//        output += ", OTRNS: " + originalNodeScoreString;        // Original TextRank Node Score
-//        output += ", ES: " + expectedScoreString;                       // Expected Score
-//        output += " [" + getScoreDirectionString(getExpectedScoreDirection()) + "]";
+//        output += "S: " + scoreString; // Current Score
 //
 //        return output;
 //    }
+    
+    @Override
+    public String toString() {
+        String output = "";
+
+        String adjustedText = text;
+        while (adjustedText.length() < 45) {
+            adjustedText = adjustedText.concat(" ");
+        }
+
+        String previousFinalTextRankScoreString =
+                MiscUtils.convertDoubleToFixedCharacterString(previousFinalTextRankScore, 2);
+        String finalTextRankScoreString = 
+                MiscUtils.convertDoubleToFixedCharacterString(finalTextRankScore, 2);
+        String originalTextRankScoreString = 
+                MiscUtils.convertDoubleToFixedCharacterString(originalTextRankScore, 2);
+        
+        String previousScoreString = MiscUtils.convertDoubleToFixedCharacterString(previousScore, 2);
+        String scoreString = MiscUtils.convertDoubleToFixedCharacterString(score, 2);
+        String originalScoreString = MiscUtils.convertDoubleToFixedCharacterString(originalScore, 2);
+        
+        String previousNodeScoreString = 
+                MiscUtils.convertDoubleToFixedCharacterString(node.getPreviousRank(), 2);
+        String textRankNodeScoreString = MiscUtils.convertDoubleToFixedCharacterString(node.getRank(), 2);
+        String originalNodeScoreString = 
+                MiscUtils.convertDoubleToFixedCharacterString(originalNodeScore, 2);
+        
+        String expectedScoreString = MiscUtils.convertDoubleToFixedCharacterString(expectedScore, 2);
+        
+        output += adjustedText;
+        output += "FTRS: " + finalTextRankScoreString;                  // Final TextRank Score (metric)
+        output += " (P: " + previousFinalTextRankScoreString + ")";
+        output += " [" + getScoreDirectionString(getFinalTextRankScoreDirection());
+        output += " (" + MiscUtils.getBooleanCheckString(finalTextRankScoreDirectionIsCorrect()) + ")]";
+        output += ", OTRS: " + originalTextRankScoreString;             // Original TextRank Score (metric)
+        output += ", S: " + scoreString;                                // Current Score
+        output += " (P: " + previousScoreString + ")";
+        output += " [" + getScoreDirectionString(getCurrentScoreDirection());
+        output += " (" + MiscUtils.getBooleanCheckString(currentScoreDirectionIsCorrect()) + ")]";
+        output += ", OS: " + originalScoreString;                       // Original Score
+        output += ", TRNS: " + textRankNodeScoreString;                 // Current TextRank Node Score
+        output += " (P: " + previousNodeScoreString + ")";
+        output += " [" + getScoreDirectionString(getCurrentNodeScoreDirection());
+        output += " (" + MiscUtils.getBooleanCheckString(textRankNodeScoreDirectionIsCorrect()) + ")]";
+        output += ", OTRNS: " + originalNodeScoreString;        // Original TextRank Node Score
+        output += ", ES: " + expectedScoreString;                       // Expected Score
+        output += " [" + getScoreDirectionString(getExpectedScoreDirection()) + "]";
+
+        return output;
+    }
 }

@@ -1,5 +1,6 @@
 package com.figueroa.nlp.rake;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,37 +33,42 @@ public class Rake {
 	private static final Logger logger = Logger.getLogger(Rake.class);
 	
     public final static String JYTHON_ROOT_PATH = "/home/gfigueroa/jython2.5.3/Lib";
-    public final static String RAKE_DIR = "./python/rake";
-    public final static String RAKE_STOPWORDS_PATH = "./python/rake/SmartStoplist.txt";
+    public final static String RAKE_DIR = "rake";
+    public final static String RAKE_STOPWORDS_PATH = RAKE_DIR + 
+    		File.separator + "SmartStoplist.txt";
     
     public final PythonInterpreter pythonInterpreter;
     public HashMap<String, RakeNode> rakeFullGraph = null;
     public HashMap<String, Double> currentKeyphrases = null;
     public HashMap<String, Double> currentWords = null;
     
-    public Rake() {
-        pythonInterpreter = initPython();
-        initRake();
+    public Rake(String resourcesPath) {
+        pythonInterpreter = initPython(resourcesPath);
+        initRake(resourcesPath);
     }
     
     /**
      * Loads main components required by the Jython interpreter (for RAKE)
      * @return an instance of the PythonInterpreter already initialized
      */
-    private PythonInterpreter initPython() {
+    private PythonInterpreter initPython(String resourcesPath) {
         logger.debug("Initializing Jython...");
         PythonInterpreter interp = new PythonInterpreter(null, new PySystemState());
         PySystemState sys = Py.getSystemState();
-        sys.path.append(new PyString(JYTHON_ROOT_PATH));
-        sys.path.append(new PyString(RAKE_DIR));
+        //sys.path.append(new PyString(JYTHON_ROOT_PATH));
+        sys.path.append(new PyString(resourcesPath + File.separator + RAKE_DIR));
         interp.exec("import sys");
         interp.exec("import rake");
         
         return interp;
     }
     
-    private void initRake() {
-        pythonInterpreter.exec("extractor = rake.Rake('" + RAKE_STOPWORDS_PATH + "')");
+    private void initRake(String resourcesPath) {
+    	String rakeStopwordsPath = resourcesPath + File.separator + RAKE_STOPWORDS_PATH;
+    	rakeStopwordsPath = rakeStopwordsPath.replaceAll("\\\\", "\\\\\\\\");
+    	pythonInterpreter.exec("extractor = rake.Rake('" + rakeStopwordsPath + "')");
+//        pythonInterpreter.exec("extractor = rake.Rake('" + resourcesPath + File.separator +
+//        		RAKE_STOPWORDS_PATH + "')");
     }
     
     /**
@@ -159,7 +165,7 @@ public class Rake {
     
     /**
      * Constructs a new RAKE Graph (for HashMap<String, RakeNode> rakeFullGraph)
- from the Jython Rake instance co-occurrence graph.
+ 	 * from the Jython Rake instance co-occurrence graph.
      * @throws Exception 
      */
     private void constructRakeGraph() throws Exception {
@@ -214,7 +220,7 @@ public class Rake {
                 String word = (String) wordObject;
                 RakeNode edgeNode = 
                         RakeNode.buildNode(rakeFullGraph, word, RakeNodeType.WORD);
-                rakeNode.connect(edgeNode, RakeNode.DEFAULT_EDGE_WEIGHT);
+                rakeNode.connect(edgeNode, Node.DEFAULT_EDGE_WEIGHT);
             }
         }
     }

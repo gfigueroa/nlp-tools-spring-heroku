@@ -32,7 +32,7 @@ public class GraphBasedKeywordExtractor {
     
 	private static final Logger logger = Logger.getLogger(AbstractManager.class);
 	
-    public static enum KeywordExtractionMethod {
+    public static enum GraphBasedKeywordExtractionMethod {
         TEXTRANK, RAKE
     }
     
@@ -41,15 +41,15 @@ public class GraphBasedKeywordExtractor {
      * @param methodString
      * @return a KeywordExtractionMethod
      */
-    public static KeywordExtractionMethod getKeywordExtractionMethodFromString(
+    public static GraphBasedKeywordExtractionMethod getGraphBasedKeywordExtractionMethodFromString(
             String methodString) {
         
         // Default is TextRank
         if (methodString == null) {
-            return KeywordExtractionMethod.TEXTRANK;
+            return GraphBasedKeywordExtractionMethod.TEXTRANK;
         }
         
-        for (KeywordExtractionMethod method : KeywordExtractionMethod.values()) {
+        for (GraphBasedKeywordExtractionMethod method : GraphBasedKeywordExtractionMethod.values()) {
             if (methodString.equalsIgnoreCase(method.name())) {
                 return method;
             }
@@ -59,7 +59,7 @@ public class GraphBasedKeywordExtractor {
     }
     
     private final RankUpProperties rankUpProperties;
-    public final KeywordExtractionMethod keywordExtractionMethod;
+    public final GraphBasedKeywordExtractionMethod keywordExtractionMethod;
     
     public final TextRank textRank;
     public final Rake rake;
@@ -75,7 +75,7 @@ public class GraphBasedKeywordExtractor {
         this.rankUpProperties = rankUpProperties;
         this.textRank = textRank;
         this.rake = null;
-        this.keywordExtractionMethod = KeywordExtractionMethod.TEXTRANK;
+        this.keywordExtractionMethod = GraphBasedKeywordExtractionMethod.TEXTRANK;
     }
     
     /**
@@ -90,7 +90,7 @@ public class GraphBasedKeywordExtractor {
         this.rankUpProperties = rankUpProperties;
         this.rake = rake;
         this.textRank = null;
-        this.keywordExtractionMethod = KeywordExtractionMethod.RAKE;
+        this.keywordExtractionMethod = GraphBasedKeywordExtractionMethod.RAKE;
     }
     
     public List<KeyPhrase> extractKeyphrases(Abstract abs) throws Exception {
@@ -102,7 +102,7 @@ public class GraphBasedKeywordExtractor {
             abs.resetScoresAndWeights();
 
             // If RAKE, set RAKE back to original state
-            if (keywordExtractionMethod == KeywordExtractionMethod.RAKE) {
+            if (keywordExtractionMethod == GraphBasedKeywordExtractionMethod.RAKE) {
                 rake.setRakeToOriginalState(abs);
             }
             

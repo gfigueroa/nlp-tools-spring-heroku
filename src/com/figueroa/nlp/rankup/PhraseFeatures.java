@@ -222,9 +222,10 @@ public class PhraseFeatures {
 //
 //        wordCount = tokenizedOriginalKeyphrase.length;
 
-        isKeyphrase = 
-                (abstractManager.isKeyphrase(abs.getAbstractId(), originalPhrase) ||
-                abstractManager.isKeyphrase(abs.getAbstractId(), stemmedPhrase));
+//        isKeyphrase = 
+//                (abstractManager.isKeyphrase(abs.getAbstractId(), originalPhrase) ||
+//                abstractManager.isKeyphrase(abs.getAbstractId(), stemmedPhrase));
+        isKeyphrase = false;
 
         features = 
                 new PhraseFeatures(posTags, stemmedPhrase, relativePositionUnstemmed,
