@@ -111,6 +111,10 @@ public class RankUpMain {
     // Stopwords
     private static Stopwords stopwords;
     
+    private RankUpMain() {
+    	;
+    }
+    
     /**
      * Loads the main components required by RankUp
      * @throws Exception 
