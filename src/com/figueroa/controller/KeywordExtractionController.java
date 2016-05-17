@@ -41,15 +41,14 @@ public class KeywordExtractionController {
     @RequestMapping(value="/keywords", method = RequestMethod.POST)
     public String extractKeywords(ModelMap model, HttpServletRequest request) {
         
-        String contextPath = request.getSession().getServletContext().getRealPath("");
-        
         try {
             String text = request.getParameter("text");
             String method = request.getParameter("method");
             String keywordsText = "";
             if (text != null) {
+            	NLPMain nlpMain = NLPMain.getNLPMainInstance();
                 ArrayList<KeyPhraseSimple> keywords = 
-                		NLPMain.extractKeywords(contextPath, text, method);
+                		nlpMain.extractKeywords(text, method);
                 for (KeyPhraseSimple keyword : keywords) {
                 	keywordsText += keyword + "\n";
                 }

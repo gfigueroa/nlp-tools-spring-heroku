@@ -36,14 +36,12 @@ public class LemmatizerController {
     @RequestMapping(value="/lemmatizer", method = RequestMethod.POST)
     public String lemmatizeText(ModelMap model, HttpServletRequest request) {
         
-        String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain lemmatizer = new NLPMain(contextPath);
-        
         try {
             String lemmatizedText;
             String text = request.getParameter("text");
             if (text != null) {
-                lemmatizedText = NLPMain.lemmatizeText(contextPath, text);
+            	NLPMain nlpMain = NLPMain.getNLPMainInstance();
+                lemmatizedText = nlpMain.lemmatizeText(text);
             }
             else {
                 text = "";

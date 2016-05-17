@@ -36,14 +36,12 @@ public class TaggerController {
     @RequestMapping(value="/tagger", method = RequestMethod.POST)
     public String tagText(ModelMap model, HttpServletRequest request) {
         
-        String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain stemmer = new NLPMain(contextPath);
-        
         try {
             String taggedText;
             String text = request.getParameter("text");
             if (text != null) {
-                taggedText = NLPMain.tagText(contextPath, text);
+            	NLPMain nlpMain = NLPMain.getNLPMainInstance();
+                taggedText = nlpMain.tagText(text);
             }
             else {
                 text = "";

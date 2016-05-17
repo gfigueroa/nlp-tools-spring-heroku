@@ -29,7 +29,7 @@ public class POSTagger {
     private MaxentTagger tagger;
     private String separator;
     private HashMap<String, POS> posTags; // A mapping between Penn Treebank Tagset and Wordnet POS Tags
-
+    
     /**
      * Constructor for the POSTagger class. Initializes the class with the given
      * model file directory, configuration file directory and default separator

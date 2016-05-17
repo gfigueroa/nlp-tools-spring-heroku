@@ -11,17 +11,20 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
-import org.apache.log4j.Logger;
 
-import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
-import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
-import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
-import com.figueroa.nlp.POSTagger;
+import org.apache.log4j.Logger;
+import org.springframework.util.ResourceUtils;
+
 import com.figueroa.nlp.KeyPhrase;
 import com.figueroa.nlp.KeyPhrase.RankingMethod;
 import com.figueroa.nlp.Lemmatizer;
+import com.figueroa.nlp.NLPMain;
+import com.figueroa.nlp.POSTagger;
 import com.figueroa.nlp.Stopwords;
 import com.figueroa.nlp.rake.Rake;
+import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
+import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
+import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
 import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.TextRank;
 import com.figueroa.nlp.textrank.WordNet;
@@ -29,8 +32,6 @@ import com.figueroa.util.Abstract;
 import com.figueroa.util.Abstract.Type;
 import com.figueroa.util.AbstractManager;
 import com.figueroa.util.DatabaseManager;
-
-import com.figueroa.nlp.NLPMain;
 
 /**
  * Main class for running RankUp
@@ -44,6 +45,12 @@ import com.figueroa.nlp.NLPMain;
 public class RankUpMain {
 
 	private static final Logger logger = Logger.getLogger(RankUpMain.class);
+	
+	// Singleton instance
+	private static RankUpMain instance = null;
+	
+	// Class path for resources
+	public final String contextPath;
 	
     // Runtime options
     // Debugging
@@ -107,19 +114,79 @@ public class RankUpMain {
     		"rankup";
     private final static String RANKUP_PROPERTIES_FILE = RANKUP_RESOURCES_PATH +
     		File.separator + "properties" + File.separator + "default.properties";
+    public final List<Abstract> allAbstracts;
+    private final RankUpProperties rankUpProperties;
 
     // Stopwords
     private static Stopwords stopwords;
     
-    private RankUpMain() {
-    	;
+    /**
+     * Get the unique (singleton) instance of this class. 
+     * If the instance doesn't exist, then it is created.
+     * @return singleton instance of RankUpMain
+     * @throws Exception
+     */
+    public static RankUpMain getRankUpMainInstance() throws Exception {
+    	if (instance == null) {
+    		instance = new RankUpMain();
+    	}
+    	return instance;
+    }
+    
+    /**
+     * Private constructor for singleton instance of this class.
+     * @throws Exception
+     */
+    private RankUpMain() throws Exception {
+    	logger.info("Starting RankUp...");
+    	
+    	String classpath = ResourceUtils.getFile("classpath:").getAbsolutePath();
+    	// Check if path ends with separator
+    	if (!classpath.endsWith(File.separator)) {
+    		classpath += File.separator;
+    	}
+    	contextPath = classpath;
+    	
+        loadComponents();
+        
+        // Load RankUp Properties
+        final String propertiesFile = contextPath + RANKUP_PROPERTIES_FILE;
+        List<RankUpProperties> rankUpPropertiesList = 
+                loadRankUpProperties(propertiesFile);
+        rankUpProperties = rankUpPropertiesList.get(0);
+        
+        String abstractSource = rankUpPropertiesList.get(0).abstractSource;
+        
+        // Retrieve all abstracts
+        logger.info("Retrieving abstracts...");
+        allAbstracts =
+                abstractManager.retrieveAbstracts(
+                rankUpPropertiesList.get(0).abstractType,
+                abstractSource, 
+                ABSTRACT_TABLE);
+        
+        logger.info("***************************************");
+        logger.info("");
+
+        rankUp = new RankUp(
+                    abstractManager, 
+                    posTagger, 
+                    lemmatizer, 
+                    stopwords,
+                    rake,
+                    rankUpProperties, 
+                    allAbstracts, 
+                    MINMAX_MID_BUG_FIX,
+                    CORRECT_NEGATIVE_WEIGHTS,
+                    DENORMALIZE_MODIFICATION_VALUE,
+                    USE_DIFFERENTIAL_CONVERGENCE);
     }
     
     /**
      * Loads the main components required by RankUp
      * @throws Exception 
      */
-    private static void loadComponents(String contextPath)
+    private void loadComponents()
             throws Exception {
         
         logger.info("Loading components...");
@@ -308,47 +375,10 @@ public class RankUpMain {
      * @param contextPath
      * @param text
      */
-    public static List<KeyPhrase> extractRankUpKeywords(String contextPath, 
+    public List<KeyPhrase> extractRankUpKeywords(
     		String text, RankingMethod rankingMethod) {
         
         try {
-
-            logger.info("Starting RankUp...");
-
-            loadComponents(contextPath);
-            
-            // Load RankUp Properties
-            final String propertiesFile = contextPath + RANKUP_PROPERTIES_FILE;
-            List<RankUpProperties> rankUpPropertiesList = 
-                    loadRankUpProperties(propertiesFile);
-            RankUpProperties rankUpProperties = rankUpPropertiesList.get(0);
-            
-            String abstractSource = rankUpPropertiesList.get(0).abstractSource;
-            
-            // Retrieve all abstracts
-            logger.info("Retrieving abstracts...");
-            List<Abstract> allAbstracts =
-                    abstractManager.retrieveAbstracts(
-                    rankUpPropertiesList.get(0).abstractType,
-                    abstractSource, 
-                    ABSTRACT_TABLE);
-            
-            logger.info("***************************************");
-            logger.info("");
-
-            rankUp = new RankUp(
-                    //textRank,
-                        abstractManager, 
-                        posTagger, 
-                        lemmatizer, 
-                        stopwords,
-                        rake,
-                        rankUpProperties, 
-                        allAbstracts, 
-                        MINMAX_MID_BUG_FIX,
-                        CORRECT_NEGATIVE_WEIGHTS,
-                        DENORMALIZE_MODIFICATION_VALUE,
-                        USE_DIFFERENTIAL_CONVERGENCE);
 
             Abstract abs = new Abstract(0, text, Type.TESTING, lemmatizer);
 

@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
+
 import com.figueroa.controller.WebServiceController.KeyPhraseSimple;
 import com.figueroa.nlp.KeyPhrase.RankingMethod;
 import com.figueroa.nlp.rankup.RankUpMain;
@@ -18,23 +21,29 @@ import com.figueroa.nlp.textrank.WordNet;
  *
  * @author gfigueroa
  */
+@Component
 public class NLPMain {
-
+	
+	// Singleton instance
+	private static NLPMain instance = null;
+	
 	// Resources
+	public final String contextPath; // Class path for resources
 	public final static String RESOURCES_PATH = 
-			/*"WEB-INF" + File.separator + */"resources" + File.separator;
+			"resources" + File.separator;
 	
     // POSTagger and Lemmatizer
 	public final static String POS_TAGGER_MODEL_PATH =
     		RESOURCES_PATH + "pos_models" + File.separator + 
     		"english-left3words-distsim.tagger";
-    
 	public final static String POS_TAGGER_CONFIG_PATH =
     		RESOURCES_PATH + "pos_models" +  File.separator + 
     		"english-left3words-distsim.tagger.props";
+	public final POSTagger posTagger;
     
 	public final static String TAG_SEPARATOR = "_";
 	public final static String WN_HOME = RESOURCES_PATH + "WordNet-3.0";
+	public final Lemmatizer lemmatizer;
 	
     // TextRank
     public final static String TEXTRANK_RESOURCES_PATH = RESOURCES_PATH + "textrank";
@@ -43,25 +52,46 @@ public class NLPMain {
     public final static String LANG_CODE = "en";
     public static LanguageModel languageModel;
     private final static Stopwords stopwords = new Stopwords();
-
-//    /**
-//     * Initialize the NLPMain class with the context path of the application.
-//     * Initializes all required classes for the NLP tools.
-//     * TODO: Make this initialization more efficient (once for entire app)
-//     * @param contextPath
-//     */
-//    public NLPMain(String contextPath) {
-//        // Check if path ends with separator
-//    	if (!contextPath.endsWith(File.separator)) {
-//    		contextPath += File.separator;
-//    	}
-//    	
-//    	// Load POSTagger
-//        posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, contextPath + 
-//                POS_TAGGER_CONFIG_PATH, TAG_SEPARATOR);
-//        // Load Lemmatizer
-//        lemmatizer = new Lemmatizer(contextPath + WN_HOME, posTagger);
-//    }
+    public final TextRank textRank;
+    
+    /**
+     * Get the unique (singleton) instance of this class. 
+     * If the instance doesn't exist, then it is created.
+     * @return singleton instance of NLPMain
+     * @throws Exception 
+     */
+    public static NLPMain getNLPMainInstance() throws Exception {
+    	if (instance == null) {
+    		instance = new NLPMain();
+    	}
+    	return instance;
+    }
+    
+    /**
+     * Private constructor for singleton instance of this class.
+     * @throws Exception 
+     */
+    private NLPMain() throws Exception {
+    	String classpath = ResourceUtils.getFile("classpath:").getAbsolutePath();
+    	// Check if path ends with separator
+    	if (!classpath.endsWith(File.separator)) {
+    		classpath += File.separator;
+    	}
+    	contextPath = classpath;
+    	
+    	// Load POSTagger
+        posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, 
+        		TAG_SEPARATOR);
+    	
+        // Load Lemmatizer
+        lemmatizer = new Lemmatizer(contextPath + WN_HOME, posTagger);
+        
+        // Load TextRank
+		languageModel = 
+	    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+		WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
+		textRank = new TextRank(stopwords, languageModel);
+    }
     
     /**
      * Lemmatize each term in a given string.
@@ -70,18 +100,7 @@ public class NLPMain {
      * @return the lemmatized text
      * @throws Exception
      */
-    public static String lemmatizeText(String contextPath, String text) throws Exception {
-    	// Check if path ends with separator
-    	if (!contextPath.endsWith(File.separator)) {
-    		contextPath += File.separator;
-    	}
-    	
-    	// Load POSTagger
-        POSTagger posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, 
-        		TAG_SEPARATOR);
-    	// Load Lemmatizer
-        Lemmatizer lemmatizer = new Lemmatizer(contextPath + WN_HOME, posTagger);
-        
+    public String lemmatizeText(String text) throws Exception {
         String lemmatizedText = lemmatizer.stemText(text, false);
         return lemmatizedText;
     }
@@ -94,16 +113,7 @@ public class NLPMain {
      * @return the POS-tagged text
      * @throws Exception
      */
-    public static String tagText(String contextPath, String text) throws Exception {
-    	// Check if path ends with separator
-    	if (!contextPath.endsWith(File.separator)) {
-    		contextPath += File.separator;
-    	}
-    	
-    	// Load POSTagger
-        POSTagger posTagger = new POSTagger(contextPath + POS_TAGGER_MODEL_PATH, 
-        		TAG_SEPARATOR);
-        
+    public String tagText(String text) throws Exception {
         String taggedText = posTagger.tagText(text);
         return taggedText;
     }
@@ -115,25 +125,15 @@ public class NLPMain {
      * @return an ArrayList of KeyPhrase
      * @throws Exception
      */
-    public static ArrayList<KeyPhraseSimple> extractKeywords(String contextPath, 
+    public ArrayList<KeyPhraseSimple> extractKeywords( 
     		String text, String method) throws Exception {
-    	
-    	// Check if path ends with separator
-    	if (!contextPath.endsWith(File.separator)) {
-    		contextPath += File.separator;
-    	}
-    	
+
     	RankingMethod rankingMethod = 
     			KeyPhrase.getRankingMethodFromString(method);
     	
     	ArrayList<KeyPhraseSimple> keywords = new ArrayList<>();
     	switch (rankingMethod) {
-    		case TEXTRANK:
-				languageModel = 
-			    		LanguageModel.buildLanguage(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-				WordNet.buildDictionary(contextPath + TEXTRANK_RESOURCES_PATH, LANG_CODE);
-				TextRank textRank = new TextRank(stopwords, languageModel);
-				
+    		case TEXTRANK:				
 				Collection<MetricVector> metricVectorCollection = textRank.run(text);
 				
 				for (MetricVector metricVector : metricVectorCollection) {
@@ -150,9 +150,9 @@ public class NLPMain {
     		case TFIDF:
     		case RIDF:
     		case CLUSTEREDNESS:
+    			RankUpMain rankUpMain = RankUpMain.getRankUpMainInstance();
 	    		List<KeyPhrase> keyphrases = 
-	    				(ArrayList<KeyPhrase>) RankUpMain.extractRankUpKeywords(
-	    						contextPath,
+	    				(ArrayList<KeyPhrase>) rankUpMain.extractRankUpKeywords(
 	    						text,
 	    						rankingMethod);
 	    		for (KeyPhrase rankUpKeyphrase : keyphrases) {

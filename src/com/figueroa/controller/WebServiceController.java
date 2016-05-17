@@ -110,11 +110,9 @@ public class WebServiceController {
     public LemmatizedTextJSON lemmatizeText(
     		@RequestParam(value="text", defaultValue="") String text,
     		HttpServletRequest request) throws Exception {
-		
-    	String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain nlpMain = new NLPMain(contextPath);
-        
-        String lemmatizedText = NLPMain.lemmatizeText(contextPath, text);
+
+        NLPMain nlpMain = NLPMain.getNLPMainInstance();
+        String lemmatizedText = nlpMain.lemmatizeText(text);
         
     	LemmatizedTextJSON lt = new LemmatizedTextJSON(text, lemmatizedText);
     	
@@ -140,11 +138,9 @@ public class WebServiceController {
     public TaggedTextJSON tagText(
     		@RequestParam(value="text", defaultValue="") String text,
     		HttpServletRequest request) throws Exception {
-    	
-    	String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain nlpMain = new NLPMain(contextPath);
         
-        String taggedText = NLPMain.tagText(contextPath, text);
+    	NLPMain nlpMain = NLPMain.getNLPMainInstance();
+        String taggedText = nlpMain.tagText(text);
         
         TaggedTextJSON tt = new TaggedTextJSON(text, taggedText);
     	
@@ -193,10 +189,8 @@ public class WebServiceController {
     		@RequestParam(value="method", defaultValue="textrank") String method,
     		HttpServletRequest request) throws Exception {
     	
-    	String contextPath = request.getSession().getServletContext().getRealPath("");
-        //NLPMain nlpMain = new NLPMain(contextPath);	
-
-    	ArrayList<KeyPhraseSimple> keywords = NLPMain.extractKeywords(contextPath, text, method);
+    	NLPMain nlpMain = NLPMain.getNLPMainInstance();
+    	ArrayList<KeyPhraseSimple> keywords = nlpMain.extractKeywords(text, method);
     	KeywordListJSON keywordList = new KeywordListJSON(text, keywords);
         
     	return keywordList;
