@@ -25,9 +25,7 @@ import com.figueroa.nlp.rake.Rake;
 import com.figueroa.nlp.rankup.GraphBasedKeywordExtractor.GraphBasedKeywordExtractionMethod;
 import com.figueroa.nlp.rankup.KeyPhraseGraph.SetLevel;
 import com.figueroa.nlp.rankup.PhraseFeatures.Feature;
-import com.figueroa.nlp.textrank.LanguageModel;
 import com.figueroa.nlp.textrank.TextRank;
-import com.figueroa.nlp.textrank.WordNet;
 import com.figueroa.util.Abstract;
 import com.figueroa.util.Abstract.Type;
 import com.figueroa.util.AbstractManager;
@@ -97,11 +95,10 @@ public class RankUpMain {
     private static AbstractManager abstractManager;
     
     // POSTagger and Lemmatizer
-    private static POSTagger posTagger;
-    private static Lemmatizer lemmatizer;
+    private Lemmatizer lemmatizer;
 
     // TextRank tools
-    public static LanguageModel languageModel;
+    private TextRank textRank;
     
     // Python and RAKE tools
     private static Rake rake;
@@ -116,9 +113,6 @@ public class RankUpMain {
     		File.separator + "properties" + File.separator + "default.properties";
     public final List<Abstract> allAbstracts;
     private final RankUpProperties rankUpProperties;
-
-    // Stopwords
-    private static Stopwords stopwords;
     
     /**
      * Get the unique (singleton) instance of this class. 
@@ -126,9 +120,13 @@ public class RankUpMain {
      * @return singleton instance of RankUpMain
      * @throws Exception
      */
-    public static RankUpMain getRankUpMainInstance() throws Exception {
+    public static RankUpMain getRankUpMainInstance(
+    		TextRank textRank, 
+    		Lemmatizer lemmatizer, 
+    		POSTagger posTagger, 
+    		Stopwords stopwords) throws Exception {
     	if (instance == null) {
-    		instance = new RankUpMain();
+    		instance = new RankUpMain(textRank, lemmatizer, posTagger, stopwords);
     	}
     	return instance;
     }
@@ -137,7 +135,11 @@ public class RankUpMain {
      * Private constructor for singleton instance of this class.
      * @throws Exception
      */
-    private RankUpMain() throws Exception {
+    private RankUpMain(
+    		TextRank textRank, 
+    		Lemmatizer lemmatizer, 
+    		POSTagger posTagger, 
+    		Stopwords stopwords) throws Exception {
     	logger.info("Starting RankUp...");
     	
     	String classpath = ResourceUtils.getFile("classpath:").getAbsolutePath();
@@ -147,7 +149,9 @@ public class RankUpMain {
     	}
     	contextPath = classpath;
     	
-        loadComponents();
+        loadComponents(textRank, 
+        		lemmatizer, 
+        		posTagger);
         
         // Load RankUp Properties
         final String propertiesFile = contextPath + RANKUP_PROPERTIES_FILE;
@@ -186,21 +190,13 @@ public class RankUpMain {
      * Loads the main components required by RankUp
      * @throws Exception 
      */
-    private void loadComponents()
+    private void loadComponents(
+    		TextRank textRank, 
+    		Lemmatizer lemmatizer, 
+    		POSTagger posTagger)
             throws Exception {
         
         logger.info("Loading components...");
-        
-        // Load Stopwords
-        stopwords = new Stopwords();
-        
-        // Load TextRank components
-        languageModel = 
-        		LanguageModel.buildLanguage(contextPath + NLPMain.TEXTRANK_RESOURCES_PATH, 
-        				NLPMain.LANG_CODE);
-        WordNet.buildDictionary(contextPath + NLPMain.TEXTRANK_RESOURCES_PATH, 
-        		NLPMain.LANG_CODE);
-        //textRank = new TextRank(logger, stopwords, languageModel);
         
         // Load DatabaseManager
         databaseManager =
@@ -209,12 +205,11 @@ public class RankUpMain {
         // Load AbstractManager
         abstractManager = new AbstractManager(databaseManager);
         
-        // Load POSTagger
-        posTagger =
-            new POSTagger(contextPath + NLPMain.POS_TAGGER_MODEL_PATH, NLPMain.TAG_SEPARATOR);
-        
         // Load Lemmatizer
-        lemmatizer = new Lemmatizer(contextPath + NLPMain.WN_HOME, posTagger);
+        this.lemmatizer = lemmatizer;
+        
+        // Load TextRank
+        this.textRank = textRank;
         
         // Load and set up RAKE
         rake = new Rake(contextPath + PYTHON_RESOURCES_PATH);
@@ -388,16 +383,6 @@ public class RankUpMain {
             GraphBasedKeywordExtractor keywordExtractor;
             if (rankUpProperties.keywordExtractionMethod == null ||
                     rankUpProperties.keywordExtractionMethod == GraphBasedKeywordExtractionMethod.TEXTRANK) {
-                
-                TextRank textRank;
-                // Check if this abstract already contains TextRank
-                if (abs.getTextRank() != null) {
-                    textRank = abs.getTextRank();
-                }
-                else {
-                    textRank = new TextRank(stopwords, languageModel);
-                    abs.setTextRank(textRank);
-                }
                  
                 keywordExtractor = new GraphBasedKeywordExtractor(
                         rankUpProperties,

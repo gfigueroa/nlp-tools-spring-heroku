@@ -150,7 +150,8 @@ public class NLPMain {
     		case TFIDF:
     		case RIDF:
     		case CLUSTEREDNESS:
-    			RankUpMain rankUpMain = RankUpMain.getRankUpMainInstance();
+    			RankUpMain rankUpMain = 
+    					RankUpMain.getRankUpMainInstance(textRank, lemmatizer, posTagger, stopwords);
 	    		List<KeyPhrase> keyphrases = 
 	    				(ArrayList<KeyPhrase>) rankUpMain.extractRankUpKeywords(
 	    						text,
