@@ -213,6 +213,14 @@
 
 	<build>
 		<sourceDirectory>src</sourceDirectory>
+		
+		<resources>
+	      	<resource>
+	       		<targetPath>${project.basedir}/target/classes/resources</targetPath>
+	        	<directory>src/resources</directory>
+	      	</resource>
+	    </resources>
+		
 		<directory>${project.basedir}/target</directory>
 
 		<pluginManagement>
