@@ -151,7 +151,7 @@ public class WebServiceController {
 	 * Web service to extract the keywords of a given text
 	 * @param text
 	 * @param method the keyword extraction method.
-	 * Possible values are: "textrank" (default="textrank")
+	 * Possible values are: ["rankup", "textrank", "rake", "tfidf", "ridf", "clusteredness"] (default="rankup")
 	 * @param request the HTTP servlet request
 	 * @return a KeywordListJSON instance representing the requested service
 	 * {
@@ -186,7 +186,7 @@ public class WebServiceController {
     		headers={"Accept=application/json"})
     public KeywordListJSON extractKeywords(
     		@RequestParam(value="text", defaultValue="") String text,
-    		@RequestParam(value="method", defaultValue="textrank") String method,
+    		@RequestParam(value="method", defaultValue="rankup") String method,
     		HttpServletRequest request) throws Exception {
     	
     	NLPMain nlpMain = NLPMain.getNLPMainInstance();
