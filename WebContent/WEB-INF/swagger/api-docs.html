@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Swagger UI</title>
+  <title>NLP Web Tools - API Docs</title>
   <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
   <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
@@ -54,8 +54,8 @@
         onComplete: function(swaggerApi, swaggerUi){
           if(typeof initOAuth == "function") {
             initOAuth({
-              clientId: "your-client-id",
-              clientSecret: "your-client-secret-if-required",
+              clientId: "user",
+              clientSecret: "secret",
               realm: "your-realms",
               appName: "your-app-name",
               scopeSeparator: ",",
@@ -84,7 +84,7 @@
         if(key && key.trim() != "") {
             var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("api_key", key, "query");
             //window.swaggerUi.api.clientAuthorizations.add("api_key", apiKeyAuth);
-			swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("X-Mashape-Key", "APIKEY", "header"));
+			swaggerUi.api.clientAuthorizations.add("key", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.BGNkz04H_AR4D_OrML6oPv_qu9UdfBOWO_gM3cQmn-U", "header"));
             log("added key " + key);
         }
       }
@@ -93,7 +93,7 @@
 
       // if you have an apiKey you would like to pre-populate on the page for demonstration purposes...
       
-	  var apiKey = "APIKEY";
+	  var apiKey = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIn0.BGNkz04H_AR4D_OrML6oPv_qu9UdfBOWO_gM3cQmn-U";
 	  $('#input_apiKey').val(apiKey);
       
 

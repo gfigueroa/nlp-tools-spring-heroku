@@ -2,7 +2,10 @@ swagger: '2.0'
 info:
   version: 1.0.0
   title: NLP Tools API
-  description: RESTful API to use the various tools provided by the NLP Web Tools site.
+  description: >
+    RESTful API to use the various tools provided by the NLP Web Tools site.
+    Please use the given API key ("Bearer ...") using the HTTP "Authorization" 
+    header when making any web service requests from outside this documentation.
   termsOfService: https://nlp-tools-java.herokuapp.com/terms
   contact:
     name: Gerardo Figueroa
