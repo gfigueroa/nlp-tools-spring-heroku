@@ -16,12 +16,12 @@ String method = methodObject != null ? (String) methodObject : "rankup";
 	
 	<br><br>
 	
-	<main>
+	<center>
 		<h1>Keyword Extraction</h1>
 		<h2>Text</h2>
-		<form method="POST">
+		<form method="POST" action="keywords.html">
 			Method:
-			<select id="method" name="method" required>
+			<select name="method" required>
 			  <option value="rankup" <%= method.equalsIgnoreCase("rankup") ? "selected" : "" %>>RankUp</option>
 			  <option value="textrank" <%= method.equalsIgnoreCase("textrank") ? "selected" : "" %>>TextRank</option>
 			  <option value="rake" <%= method.equalsIgnoreCase("rake") ? "selected" : "" %>>RAKE</option>
@@ -29,34 +29,15 @@ String method = methodObject != null ? (String) methodObject : "rankup";
 			  <option value="ridf" <%= method.equalsIgnoreCase("ridf") ? "selected" : "" %>>RIDF</option>
 			  <option value="clusteredness" <%= method.equalsIgnoreCase("clusteredness") ? "selected" : "" %>>Clusteredness</option>
 			</select>
-			<br/>
-			<textarea id="original-text" name="text" rows="10" cols="100" placeholder="Enter text here...">${text}</textarea>
-			<br/> 
-			<input id="keywords-btn" type="submit" value="Extract keywords!" />
+			<br>
+			<textarea name="text" rows="10" cols="100">${text}</textarea>
+			<br> 
+			<input type="submit" value="Extract keywords!" />
 		</form>
 
-		<div id="loading-div">
-			<img width="30px" src="resources/img/hourglass.svg" />
-		</div> 
-
 		<h2>Keywords</h2>
-		<div id="keywords-div">
-			<table id="keywords-table">
-		        <thead>
-		            <tr>
-		                <th class="col-left">Keyword</th>
-		                <th class="col-right">Score</th>
-		            </tr>
-		        </thead>
-		        <tbody>
-		            <tr>
-		                <td class="col-left"></td>
-		                <td class="col-right"></td>
-		            </tr>
-		        </tbody>
-		    </table>
-	    </div>
-	</main>
+		<textarea name="keywords" rows="10" cols="100" disabled>${keywordsText}</textarea>
+	</center>
 	
 	<%@include file='footer.jsp'%>
 	

@@ -37,7 +37,10 @@ public class KeywordExtractionController {
      * @param model
      * @param request
      * @return the result view
+     * 
+     * @deprecated Use AJAX now
      */
+    @Deprecated
     @RequestMapping(value="/keywords", method = RequestMethod.POST)
     public String extractKeywords(ModelMap model, HttpServletRequest request) {
         

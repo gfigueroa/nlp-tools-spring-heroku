@@ -32,7 +32,10 @@ public class LemmatizerController {
      * @param model
      * @param request
      * @return the result view
+     * 
+     * @deprecated Use AJAX now
      */
+    @Deprecated
     @RequestMapping(value="/lemmatizer", method = RequestMethod.POST)
     public String lemmatizeText(ModelMap model, HttpServletRequest request) {
         

@@ -1,4 +1,4 @@
-﻿/*=============================================================
+/*=============================================================
     Authour URI: www.binarytheme.com
     License: Commons Attribution 3.0
 
@@ -267,4 +267,43 @@ h1::after {
     text-align:right;
     color:#fff;
     font-size:15px;
+}
+
+/*==== Added Styles ====*/
+main {
+	text-align: center;
+}
+
+#keywords-div {
+	height: 500px;
+	overflow: auto;
+	width: 60%;
+	margin: auto;
+}
+
+#keywords-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 20px;
+}
+
+#keywords-table th, td {
+	border: 1px solid #cdcdcd;
+}
+
+#keywords-table th, table td{
+    padding: 10px;
+}
+
+.col-left {
+	text-align: left;
+}
+
+.col-right {
+	text-align: right;
+}
+
+#loading-div {
+	margin top: 20px;
+	margin bottom: 20px;
 }

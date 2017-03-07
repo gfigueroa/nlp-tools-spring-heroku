@@ -31,6 +31,9 @@
 	<!--  Custom Scripts -->
 	<script src="resources/js/custom.js"></script>
 	
+	<!--  AJAX -->
+	<script src="resources/js/ajax-functions.js"></script>
+	
 	<link rel="icon" 
       type="image/png" 
       href="resources/img/favicon.png">

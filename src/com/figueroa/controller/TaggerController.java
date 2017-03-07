@@ -32,7 +32,10 @@ public class TaggerController {
      * @param model
      * @param request
      * @return the result view
+     * 
+     * @deprecated Use AJAX now
      */
+    @Deprecated
     @RequestMapping(value="/tagger", method = RequestMethod.POST)
     public String tagText(ModelMap model, HttpServletRequest request) {
         
