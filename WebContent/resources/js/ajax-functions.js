@@ -12,11 +12,11 @@ function loadComponents() {
 
 function loadAjaxSimple(ws, dataElement, resultElement, resultField) {
 	$.ajax({
-        type: "GET",
+        type: "POST",
         url: "/ws/" + ws,
+        contentType: "application/json",
         dataType: "json",
-        data: { "text": dataElement.val()
-        },
+        data: JSON.stringify({ "originalText": dataElement.val() }),
         beforeSend: function() {
         	resultElement.empty(); // Clear the table body
         	$("#loading-div").show();
@@ -35,12 +35,12 @@ function loadAjaxSimple(ws, dataElement, resultElement, resultField) {
 
 function loadKeywords(ws, textElement, methodElement, resultElement) {
 	$.ajax({
-        type: "GET",
+        type: "POST",
         url: "/ws/" + ws,
+        contentType: "application/json",
         dataType: "json",
-        data: { "text": textElement.val(),
-        		"method": methodElement.val()
-        },
+        data: JSON.stringify({ "originalText": textElement.val(),
+        	"method": methodElement.val() }),
         beforeSend: function() {
         	resultElement.empty(); // Clear the table body
         	$("#loading-div").show();
