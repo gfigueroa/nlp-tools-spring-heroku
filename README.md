@@ -31,4 +31,8 @@ TODO: Write history
 
 ## Credits
 Written by Gerardo Figueroa.
-Uses Stanford NLP tools and MIT Wordnet library.
+Third-party libraries:
+- [Stanford NLP tools](https://nlp.stanford.edu/nlp/javadoc/javanlp/)
+- [MIT Wordnet library](https://projects.csail.mit.edu/jwi/)
+- [Python implementation of RAKE (Bakharia et al.)](https://github.com/aneesha/RAKE)
+- [Java implementation of TextRank (paco@sharethis.com)](https://github.com/samxhuan/textrank)
